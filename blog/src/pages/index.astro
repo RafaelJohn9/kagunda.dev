@@ -1,0 +1,352 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import Footer from '../components/Footer.astro';
+
+// Get all blog posts and sort by date
+const allBlogPosts = await getCollection('blog', ({ data }) => {
+  return !data.draft; // Make sure 'draft' is also defined in your schema!
+});
+
+// Sort by date (newest first) - ✅ Changed 'publishedAt' to 'pubDate'
+const sortedPosts = allBlogPosts.sort((a, b) => 
+  new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+);
+
+// Get featured posts or latest 6 - ✅ Ensure 'featured' is in your schema
+const featuredPosts = sortedPosts.filter(post => post.data.featured).slice(0, 6) || 
+                     sortedPosts.slice(0, 6);
+
+// Separate posts by category - ✅ Ensure 'category' is in your schema
+const libraryPosts = sortedPosts.filter(post => post.data.category === 'library').slice(0, 2);
+const writingsPosts = sortedPosts.filter(post => post.data.category === 'writings').slice(0, 2);
+const tutorialsPosts = sortedPosts.filter(post => post.data.category === 'tutorials').slice(0, 2);
+
+// Get unique tags for popular topics
+const allTags = [...new Set(allBlogPosts.flatMap(post => post.data.tags))];
+const popularTags = allTags.slice(0, 8); // Show first 8 tags
+---
+
+<BaseLayout title="">
+  <Header />
+  
+  <main>
+    <Hero />
+    
+    <section id="latest-articles">
+      <div class="container">
+        <h2>From My Desk</h2>
+        
+        <!-- Tutorials Section -->
+        {tutorialsPosts.length > 0 && (
+          <div class="category-section">
+            <h3 class="category-title">
+              <span class="category-icon">
+                <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                  <path d="M12 2L3 7v13h18V7L12 2zm0 2.3l6 3.6v1.1l-6-3.6-6 3.6V7.9l6-3.6zm-6 6.7l6 3.6 6-3.6v7.4H6v-7.4z"/>
+                </svg>
+              </span>
+              Tutorials
+            </h3>
+            <div class="articles-grid">
+              {tutorialsPosts.map((post) => (
+                <ArticleCard
+                  title={post.data.title}
+                  excerpt={post.data.description}
+                  tags={post.data.tags}
+                  slug={post.slug}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        
+        <!-- Writings Section -->
+        {writingsPosts.length > 0 && (
+          <div class="category-section">
+            <h3 class="category-title">
+              <span class="category-icon">
+                <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                  <path d="M21 6h-8l-2-2H3v16h18V6zm-2 12H5V8h14v10z"/>
+                </svg>
+              </span>
+              Writings
+            </h3>
+            <div class="articles-grid">
+              {writingsPosts.map((post) => (
+                <ArticleCard
+                  title={post.data.title}
+                  excerpt={post.data.description}
+                  tags={post.data.tags}
+                  slug={post.slug}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        
+        <!-- Library Section -->
+        {libraryPosts.length > 0 && (
+          <div class="category-section">
+            <h3 class="category-title">
+                <span class="category-icon">
+                  <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+                  </svg>
+                </span>
+              Library
+            </h3>
+            <div class="articles-grid">
+              {libraryPosts.map((post) => (
+                <ArticleCard
+                  title={post.data.title}
+                  excerpt={post.data.description}
+                  tags={post.data.tags}
+                  slug={post.slug}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+
+    <section id="popular-topics">
+      <div class="container">
+        <h2>Explore My Library</h2>
+        <ul class="topics-list">
+          {popularTags.map(tag => (
+            <li class="topic-badge">
+              <a href={`/tags/${tag?.toLowerCase().replace(/\s+/g, '-')}`}>{tag}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <section id="community">
+      <div class="container community-content">
+        <h2>A Personal Preface</h2>
+        <p>This space is my notebook the things I've learned, the mistakes I've made, and the breakthroughs I've celebrated. You're welcome to read along. No gatekeeping. No guru vibes. Just one developer, sharing their chapter.</p>
+      </div>
+    </section>
+
+    <section id="subscribe">
+      <div class="container">
+        <h2>Get my next chapter by email.</h2>
+        <form class="subscribe-form">
+          <input type="email" placeholder="your.email@example.com" required>
+          <button type="submit">Subscribe</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  #latest-articles h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 50px;
+    position: relative;
+    display: inline-block;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  #latest-articles h2::after {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 2px;
+    background: var(--accent-color);
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .category-section {
+    margin-bottom: 60px;
+  }
+
+  .category-title {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+  }
+
+  .category-icon {
+    font-size: 1.5rem;
+  }
+
+  .articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 40px;
+  }
+
+  #popular-topics h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 50px;
+    position: relative;
+    display: inline-block;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  #popular-topics h2::after {
+    content: '';
+    position: absolute;
+    width: 80px;
+    height: 2px;
+    background: var(--accent-color);
+    bottom: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .topics-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    list-style: none;
+    padding: 0;
+  }
+
+  .topic-badge a {
+    display: block;
+    text-decoration: none;
+    color: var(--heading-color);
+    background-color: var(--card-bg-color);
+    border: 1px solid var(--border-color);
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: 700;
+    box-shadow: 2px 2px 0 var(--border-color);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    font-size: 0.95rem;
+  }
+
+  .topic-badge a:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--border-color);
+    background-color: var(--bg-color);
+  }
+
+  #community {
+    background-color: var(--card-bg-color);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .community-content {
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    position: relative;
+    padding: 0 20px;
+  }
+
+  .community-content h2 {
+    font-style: italic;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .community-content p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    position: relative;
+    z-index: 1;
+  }
+
+  #subscribe {
+    padding: 80px 0 60px;
+  }
+
+  #subscribe h2 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  .subscribe-form {
+    max-width: 500px;
+    margin: 20px auto 0;
+    display: flex;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--card-bg-color);
+    padding: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .subscribe-form input {
+    flex-grow: 1;
+    border: none;
+    background: none;
+    padding: 10px 15px;
+    font-family: 'Lora', serif;
+    font-size: 1rem;
+    color: var(--text-color);
+  }
+
+  .subscribe-form input:focus {
+    outline: none;
+  }
+
+  .subscribe-form button {
+    background-color: var(--heading-color);
+    color: var(--bg-color);
+    border: none;
+    padding: 10px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .subscribe-form button:hover {
+    background-color: var(--accent-color);
+  }
+
+  @media (max-width: 480px) {
+    .subscribe-form {
+      flex-direction: column;
+      gap: 10px;
+      border: none;
+      background: none;
+      padding: 0;
+    }
+
+    .subscribe-form input {
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      padding: 12px;
+      margin-bottom: 10px;
+    }
+
+    .subscribe-form button {
+      padding: 12px;
+    }
+  }
+</style>
+

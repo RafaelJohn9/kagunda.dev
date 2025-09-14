@@ -1,0 +1,62 @@
+---
+---
+
+<section id="hero" style="background-image: url('https://2sgnuw8gtrdbczqn.public.blob.vercel-storage.com/wood.jpeg'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+  <div class="container hero-content">
+    <h1 style="color:#d4a76a;">Next Chapter in Software Engineering</h1>
+    <p style="color:#fff; font-size:25px;">Welcome to my reading room — a personal collection of tutorials, insights, and experiments. I'm learning out loud. Care to join me?</p>
+    <a href="#latest-articles" class="cta-button">Read With Me</a>
+  </div>
+</section>
+
+<style>
+  #hero {
+    background: linear-gradient(175deg, var(--bg-color) 0%, var(--card-bg-color) 100%);
+    text-align: center;
+    padding: 120px 0 100px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 3;
+  }
+
+  .hero-content h1 {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    letter-spacing: -1px;
+  }
+
+  .hero-content p {
+    font-size: 1.2rem;
+    max-width: 650px;
+    margin: 0 auto 30px;
+    font-style: italic;
+  }
+
+  .cta-button {
+    display: inline-block;
+    background-color: var(--heading-color);
+    color: var(--bg-color);
+    padding: 15px 35px;
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    letter-spacing: 0.5px;
+  }
+
+  .cta-button:hover {
+    background-color: var(--accent-color);
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 768px) {
+    .hero-content h1 {
+      font-size: 2.2rem;
+    }
+  }
+</style>

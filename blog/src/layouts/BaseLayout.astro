@@ -1,0 +1,316 @@
+---
+export interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "My Developer's Chapter" } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" style="border-radius: 50%;">
+  <title>{title} Kagunda.dev</title>
+  <meta name="description" content={description}>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+</head>
+<body data-theme="light">
+  <slot />
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Theme Toggler
+      const themeToggleButton = document.getElementById('theme-toggle');
+      const body = document.body;
+
+      const applyTheme = () => {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        body.setAttribute('data-theme', savedTheme);
+      };
+
+      if (themeToggleButton) {
+        themeToggleButton.addEventListener('click', () => {
+          let currentTheme = body.getAttribute('data-theme');
+          let newTheme = currentTheme === 'light' ? 'dark' : 'light';
+          body.setAttribute('data-theme', newTheme);
+          localStorage.setItem('theme', newTheme);
+        });
+      }
+
+      applyTheme();
+
+      // Mobile Menu
+      const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+      const mainNav = document.getElementById('main-nav');
+
+      if (mobileMenuToggle && mainNav) {
+        mobileMenuToggle.addEventListener('click', () => {
+          mainNav.classList.toggle('active');
+        });
+
+        mainNav.addEventListener('click', (e) => {
+          if(e.target.tagName === 'A') {
+            mainNav.classList.remove('active');
+          }
+        });
+      }
+
+      // Smooth Scroll for CTA
+      const ctaButton = document.querySelector('.cta-button');
+      const latestArticlesSection = document.getElementById('latest-articles');
+
+      if (ctaButton && latestArticlesSection) {
+        ctaButton.addEventListener('click', (event) => {
+          event.preventDefault();
+          latestArticlesSection.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        });
+      }
+    });
+  </script>
+</body>
+</html>
+
+<style is:global>
+  /* Root & Color Palettes */
+  :root {
+    --bg-color: #fdf8ec;
+    --text-color: #5c4b3f;
+    --heading-color: #8b5e3c;
+    --accent-color: #a67c52;
+    --card-bg-color: #f9f3e4;
+    --border-color: #e0d3b8;
+    --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.04);
+    --card-hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+    --coffee-stain-1: rgba(166, 124, 82, 0.08);
+    --coffee-stain-2: rgba(150, 110, 70, 0.06);
+    --coffee-stain-3: rgba(180, 130, 90, 0.05);
+    --coffee-stain-4: rgba(140, 100, 65, 0.04);
+    --coffee-stain-5: rgba(120, 85, 55, 0.03);
+  }
+
+  [data-theme="dark"] {
+    --bg-color: #1e1b18;
+    --text-color: #e3d7c5;
+    --heading-color: #d4a76a;
+    --accent-color: #c19a6b;
+    --card-bg-color: #2a2521;
+    --border-color: #4a4038;
+    --card-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    --card-hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    --coffee-stain-1: rgba(166, 124, 82, 0.15);
+    --coffee-stain-2: rgba(150, 110, 70, 0.12);
+    --coffee-stain-3: rgba(180, 130, 90, 0.10);
+    --coffee-stain-4: rgba(140, 100, 65, 0.08);
+    --coffee-stain-5: rgba(120, 85, 55, 0.06);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Lora', serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-size: 16px;
+    line-height: 1.7;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Coffee Stain Gradient Background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        ellipse 900px 700px at 10% 15%,
+        var(--coffee-stain-1) 0%,
+        var(--coffee-stain-2) 25%,
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 700px 900px at 90% 8%,
+        var(--coffee-stain-2) 0%,
+        var(--coffee-stain-3) 30%,
+        transparent 65%
+      ),
+      radial-gradient(
+        ellipse 1000px 600px at 55% 95%,
+        var(--coffee-stain-1) 0%,
+        var(--coffee-stain-4) 40%,
+        transparent 75%
+      ),
+      radial-gradient(
+        ellipse 500px 800px at 5% 50%,
+        var(--coffee-stain-3) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 400px 300px at 95% 40%,
+        var(--coffee-stain-4) 0%,
+        transparent 60%
+      ),
+      linear-gradient(
+        125deg,
+        var(--coffee-stain-5) 0%,
+        transparent 35%,
+        var(--coffee-stain-4) 75%,
+        transparent 100%
+      );
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.7;
+    background:
+      radial-gradient(
+        ellipse 350px 600px at 20% 30%,
+        var(--coffee-stain-2) 0%,
+        transparent 45%
+      ),
+      radial-gradient(
+        ellipse 500px 250px at 80% 20%,
+        var(--coffee-stain-3) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 250px 450px at 85% 70%,
+        var(--coffee-stain-4) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 400px 300px at 25% 85%,
+        var(--coffee-stain-2) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 300px 400px at 60% 60%,
+        var(--coffee-stain-5) 0%,
+        transparent 45%
+      );
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    color: var(--heading-color);
+    line-height: 1.3;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.03);
+  }
+
+  .container {
+    width: 90%;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  section {
+    padding: 80px 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  section:not(#hero) {
+    border-top: 1px solid var(--border-color);
+  }
+
+  @media (max-width: 992px) {
+    .hero-content h1 {
+      font-size: 2.8rem !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    section {
+      padding: 60px 0;
+    }
+
+    #hero {
+      padding: 100px 0 80px !important;
+    }
+
+    body::before {
+      background:
+        radial-gradient(
+          ellipse 600px 500px at 15% 20%,
+          var(--coffee-stain-1) 0%,
+          transparent 60%
+        ),
+        radial-gradient(
+          ellipse 500px 600px at 85% 15%,
+          var(--coffee-stain-2) 0%,
+          transparent 55%
+        ),
+        radial-gradient(
+          ellipse 700px 400px at 50% 90%,
+          var(--coffee-stain-1) 0%,
+          transparent 65%
+        );
+    }
+
+    body::after {
+      background:
+        radial-gradient(
+          ellipse 250px 350px at 20% 40%,
+          var(--coffee-stain-3) 0%,
+          transparent 45%
+        ),
+        radial-gradient(
+          ellipse 300px 200px at 80% 30%,
+          var(--coffee-stain-4) 0%,
+          transparent 50%
+        );
+    }
+  }
+
+  @media (max-width: 480px) {
+    body::before {
+      background:
+        radial-gradient(
+          ellipse 400px 350px at 20% 25%,
+          var(--coffee-stain-1) 0%,
+          transparent 55%
+        ),
+        radial-gradient(
+          ellipse 350px 400px at 80% 20%,
+          var(--coffee-stain-2) 0%,
+          transparent 50%
+        ),
+        radial-gradient(
+          ellipse 500px 250px at 50% 85%,
+          var(--coffee-stain-3) 0%,
+          transparent 60%
+        );
+    }
+  }
+</style>
+

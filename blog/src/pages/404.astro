@@ -1,0 +1,723 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="Page Not Found" description="The page you're looking for seems to have wandered off into the digital wilderness.">
+  <Header />
+  
+  <main class="not-found-main">
+    <section class="not-found-section">
+      <div class="container">
+        <div class="not-found-content">
+          <!-- Animated Coffee Cup -->
+          <div class="coffee-animation">
+            <div class="coffee-cup">
+              <div class="coffee-handle"></div>
+              <div class="coffee-liquid">
+                <div class="coffee-steam">
+                  <span class="steam steam-1"></span>
+                  <span class="steam steam-2"></span>
+                  <span class="steam steam-3"></span>
+                </div>
+              </div>
+            </div>
+            <div class="coffee-spill"></div>
+          </div>
+
+          <!-- 404 Content -->
+          <div class="error-content">
+            <div class="error-code">
+              <span class="digit digit-1">4</span>
+              <span class="digit digit-2">0</span>
+              <span class="digit digit-3">4</span>
+            </div>
+            
+            <h1 class="error-title">Page Not Found in My Library</h1>
+            
+            <p class="error-description">
+                Oops! The page you're looking for seems to have taken an unscheduled coffee break or is busy reorganizing my digital library. 
+                Don't worry, it's probably just lost in the stacks of creativity!
+            </p>
+            
+            <!-- Animated Books -->
+            <div class="floating-books">
+              <div class="book book-1">
+                <div class="book-spine"></div>
+              </div>
+              <div class="book book-2">
+                <div class="book-spine"></div>
+              </div>
+              <div class="book book-3">
+                <div class="book-spine"></div>
+              </div>
+            </div>
+
+            <!-- Navigation Options -->
+            <div class="error-actions">
+                <a href="/" class="primary-button">
+                <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                </svg>
+                Back to Home
+                </a>
+                <a href="/tutorials" class="secondary-button">
+                <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                  <path d="M12 2L3 7v13h18V7L12 2zm0 2.3l6 3.6v1.1l-6-3.6-6 3.6V7.9l6-3.6zm-6 6.7l6 3.6 6-3.6v7.4H6v-7.4z"/>
+                </svg>
+                Browse Tutorials
+                </a>
+                <a href="/writings" class="secondary-button">
+                <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                  <path d="M21 6h-8l-2-2H3v16h18V6zm-2 12H5V8h14v10z"/>
+                </svg>
+                Read Writings
+                </a>
+            </div>
+
+            <!-- Search suggestion -->
+            <div class="search-suggestion">
+              <p>Looking for something specific? Try searching through my:</p>
+              <div class="quick-links">
+                <a href="/library" class="quick-link">Library</a>
+                <a href="/tags" class="quick-link">Topics</a>
+                <a href="/archive" class="quick-link">Archive</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Animated Paper Planes -->
+          <div class="paper-planes">
+            <div class="paper-plane plane-1"></div>
+            <div class="paper-plane plane-2"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .not-found-main {
+    min-height: calc(100vh - 140px);
+    display: flex;
+    align-items: center;
+    padding: 60px 0;
+  }
+
+  .not-found-section {
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .not-found-content {
+    text-align: center;
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  /* Coffee Cup Animation */
+  .coffee-animation {
+    position: relative;
+    margin-bottom: 40px;
+    display: inline-block;
+  }
+
+  .coffee-cup {
+    width: 80px;
+    height: 100px;
+    background: linear-gradient(145deg, var(--card-bg-color), var(--bg-color));
+    border: 3px solid var(--border-color);
+    border-radius: 0 0 40px 40px;
+    position: relative;
+    box-shadow: var(--card-shadow);
+    animation: gentle-bounce 3s ease-in-out infinite;
+  }
+
+  .coffee-handle {
+    width: 20px;
+    height: 30px;
+    border: 3px solid var(--border-color);
+    border-left: none;
+    border-radius: 0 15px 15px 0;
+    position: absolute;
+    right: -23px;
+    top: 20px;
+    background: transparent;
+  }
+
+  .coffee-liquid {
+    width: 70px;
+    height: 60px;
+    background: linear-gradient(45deg, var(--accent-color), var(--heading-color));
+    border-radius: 0 0 35px 35px;
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    overflow: hidden;
+  }
+
+  .coffee-liquid::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: coffee-ripple 2s ease-in-out infinite;
+  }
+
+  .coffee-steam {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .steam {
+    position: absolute;
+    width: 2px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 1px;
+    opacity: 0.6;
+    filter: blur(0.5px); /* Softens edges for realism */
+    animation: steam-rise 2s ease-in-out infinite;
+  }
+
+  .steam-1 {
+    left: -10px;
+    animation-delay: 0s;
+  }
+
+  .steam-2 {
+    left: 0px;
+    animation-delay: 0.5s;
+  }
+
+  .steam-3 {
+    left: 10px;
+    animation-delay: 1s;
+  }
+
+  .coffee-spill {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 20px;
+    background: radial-gradient(ellipse, var(--coffee-stain-1), transparent);
+    border-radius: 50%;
+    animation: spill-grow 4s ease-in-out infinite;
+  }
+
+  /* 404 Error Code */
+  .error-code {
+    font-family: 'Playfair Display', serif;
+    font-size: 8rem;
+    font-weight: 700;
+    color: var(--heading-color);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .digit {
+    display: inline-block;
+    animation: digit-float 3s ease-in-out infinite;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .digit-1 {
+    animation-delay: 0s;
+  }
+
+  .digit-2 {
+    animation-delay: 0.5s;
+    transform: scale(1.1);
+  }
+
+  .digit-3 {
+    animation-delay: 1s;
+  }
+
+  .error-title {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: var(--heading-color);
+    animation: fade-in-up 1s ease-out;
+  }
+
+  .error-description {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    color: var(--text-color);
+    animation: fade-in-up 1s ease-out 0.3s both;
+  }
+
+  /* Floating Books */
+  .floating-books {
+    position: absolute;
+    top: 50%;
+    right: -50px;
+    transform: translateY(-50%);
+  }
+
+  .book {
+    width: 30px;
+    height: 40px;
+    background: var(--card-bg-color);
+    border: 2px solid var(--border-color);
+    border-radius: 2px;
+    position: relative;
+    margin-bottom: 15px;
+    animation: book-float 4s ease-in-out infinite;
+  }
+
+  .book-spine {
+    width: 4px;
+    height: 35px;
+    background: var(--accent-color);
+    position: absolute;
+    left: 3px;
+    top: 2.5px;
+    border-radius: 1px;
+  }
+
+  .book-1 {
+    animation-delay: 0s;
+  }
+
+  .book-2 {
+    animation-delay: 1s;
+    background: var(--heading-color);
+  }
+
+  .book-2 .book-spine {
+    background: var(--text-color);
+  }
+
+  .book-3 {
+    animation-delay: 2s;
+  }
+
+  /* Action Buttons */
+  .error-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    animation: fade-in-up 1s ease-out 0.6s both;
+  }
+
+  .primary-button {
+    background-color: var(--heading-color);
+    color: var(--bg-color);
+    padding: 15px 30px;
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: var(--card-shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .primary-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.6s ease;
+  }
+
+  .primary-button:hover::before {
+    left: 100%;
+  }
+
+  .primary-button:hover {
+    background-color: var(--accent-color);
+    transform: translateY(-3px);
+    box-shadow: var(--card-hover-shadow);
+  }
+
+  .secondary-button {
+    background-color: transparent;
+    color: var(--heading-color);
+    padding: 15px 25px;
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    text-decoration: none;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .secondary-button:hover {
+    background-color: var(--card-bg-color);
+    border-color: var(--heading-color);
+    transform: translateY(-2px);
+  }
+
+  .button-icon {
+    font-size: 1.2rem;
+  }
+
+  /* Search Suggestions */
+  .search-suggestion {
+    margin-top: 40px;
+    animation: fade-in-up 1s ease-out 0.9s both;
+  }
+
+  .search-suggestion p {
+    color: var(--text-color);
+    margin-bottom: 15px;
+    font-style: italic;
+  }
+
+  .quick-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .quick-link {
+    color: var(--accent-color);
+    text-decoration: none;
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background-color: var(--card-bg-color);
+  }
+
+  .quick-link:hover {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    transform: scale(1.05);
+  }
+
+  /* Paper Planes */
+  .paper-planes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .paper-plane {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-bottom: 30px solid var(--border-color);
+    opacity: 0.3;
+    animation: plane-fly 15s linear infinite;
+  }
+
+  .paper-plane::before {
+    content: '';
+    position: absolute;
+    left: -10px;
+    top: 10px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 15px solid var(--text-color);
+  }
+
+  .plane-1 {
+    top: 20%;
+    animation-delay: 0s;
+  }
+
+  .plane-2 {
+    top: 70%;
+    animation-delay: 7s;
+  }
+
+  /* Animations */
+  @keyframes gentle-bounce {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(2deg); }
+  }
+
+  @keyframes coffee-ripple {
+    0%, 100% { transform: scaleX(1); opacity: 0.3; }
+    50% { transform: scaleX(1.2); opacity: 0.1; }
+  }
+
+  @keyframes steam-rise {
+    0% {
+      opacity: 0.6;
+      transform: translateY(0) scale(1);
+    }
+    40% {
+      opacity: 0.8;
+      transform: translateY(-15px) scale(1.1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-40px) scale(0.7);
+    }
+  }
+
+  @keyframes spill-grow {
+    0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.6; }
+    50% { transform: translateX(-50%) scale(1.1); opacity: 0.8; }
+  }
+
+  @keyframes digit-float {
+    0%, 100% { transform: translateY(0) rotateX(0deg); }
+    33% { transform: translateY(-8px) rotateX(10deg); }
+    66% { transform: translateY(4px) rotateX(-5deg); }
+  }
+
+  @keyframes book-float {
+    0%, 100% { transform: translateY(0) rotateZ(0deg); }
+    25% { transform: translateY(-15px) rotateZ(2deg); }
+    50% { transform: translateY(-5px) rotateZ(-1deg); }
+    75% { transform: translateY(-20px) rotateZ(3deg); }
+  }
+
+  @keyframes plane-fly {
+    0% { left: -50px; transform: translateY(0) rotateZ(0deg); }
+    25% { transform: translateY(-20px) rotateZ(5deg); }
+    50% { transform: translateY(10px) rotateZ(-3deg); }
+    75% { transform: translateY(-15px) rotateZ(2deg); }
+    100% { left: 100%; transform: translateY(0) rotateZ(0deg); }
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .error-code {
+      font-size: 5rem;
+    }
+
+    .error-title {
+      font-size: 2rem;
+    }
+
+    .error-description {
+      font-size: 1.1rem;
+      padding: 0 20px;
+    }
+
+    .error-actions {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .floating-books {
+      display: none;
+    }
+
+    .coffee-cup {
+      width: 60px;
+      height: 80px;
+    }
+
+    .coffee-liquid {
+      width: 50px;
+      height: 45px;
+    }
+
+    .primary-button,
+    .secondary-button {
+      width: 100%;
+      max-width: 280px;
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .error-code {
+      font-size: 4rem;
+      gap: 5px;
+    }
+
+    .error-title {
+      font-size: 1.8rem;
+    }
+
+    .quick-links {
+      gap: 10px;
+    }
+
+    .quick-link {
+      font-size: 0.8rem;
+      padding: 6px 12px;
+    }
+  }
+
+  /* Dark theme adjustments */
+  [data-theme="dark"] .coffee-cup {
+    background: linear-gradient(145deg, var(--card-bg-color), #3a3530);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  [data-theme="dark"] .paper-plane {
+    border-bottom-color: var(--accent-color);
+    opacity: 0.2;
+  }
+
+  [data-theme="dark"] .paper-plane::before {
+    border-top-color: var(--heading-color);
+  }
+
+  /* Add some extra coffee stain effects for the 404 page */
+  .not-found-section::before {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 5%;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, var(--coffee-stain-2), transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: subtle-pulse 8s ease-in-out infinite;
+  }
+
+  .not-found-section::after {
+    content: '';
+    position: absolute;
+    bottom: 15%;
+    right: 8%;
+    width: 200px;
+    height: 100px;
+    background: radial-gradient(ellipse, var(--coffee-stain-3), transparent 60%);
+    pointer-events: none;
+    animation: subtle-pulse 6s ease-in-out infinite reverse;
+  }
+
+  @keyframes subtle-pulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 0.3; transform: scale(1.1); }
+  }
+</style>
+
+<script>
+  // Add some interactive elements
+  document.addEventListener('DOMContentLoaded', () => {
+    // Add click effect to coffee cup
+    const coffeeCup = document.querySelector('.coffee-cup');
+    if (coffeeCup) {
+      coffeeCup.addEventListener('click', () => {
+        coffeeCup.style.animation = 'none';
+        coffeeCup.offsetHeight; // Trigger reflow
+        coffeeCup.style.animation = 'gentle-bounce 0.6s ease-in-out';
+        
+        setTimeout(() => {
+          coffeeCup.style.animation = 'gentle-bounce 3s ease-in-out infinite';
+        }, 600);
+      });
+    }
+
+    // Add parallax effect to floating elements
+    let ticking = false;
+    
+    const updateParallax = (scrollY: number) => {
+      const books = document.querySelectorAll('.book');
+      const planes = document.querySelectorAll('.paper-plane');
+      
+      books.forEach((book, index) => {
+        const speed = (index + 1) * 0.5;
+        const yPos = scrollY * speed * 0.1;
+        (book as HTMLElement).style.transform = `translateY(${yPos}px)`;
+      });
+      
+      planes.forEach((plane, index) => {
+        const speed = (index + 1) * 0.3;
+        const yPos = scrollY * speed * 0.05;
+        (plane as HTMLElement).style.transform = `translateY(${yPos}px)`;
+      });
+      
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => updateParallax(window.scrollY));
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+
+    // Add hover effects to digits
+    const digits = document.querySelectorAll('.digit');
+    digits.forEach((digit) => {
+      digit.addEventListener('mouseenter', () => {
+        (digit as HTMLElement).style.transform = 'scale(1.1) rotateY(15deg)';
+        (digit as HTMLElement).style.color = 'var(--accent-color)';
+      });
+      
+      digit.addEventListener('mouseleave', () => {
+        (digit as HTMLElement).style.transform = '';
+        (digit as HTMLElement).style.color = '';
+      });
+    });
+
+    // Add some random book movements
+    const addRandomMovement = () => {
+      const books = document.querySelectorAll('.book');
+      books.forEach((book, index) => {
+        setTimeout(() => {
+          (book as HTMLElement).style.transform += ` rotateZ(${Math.random() * 10 - 5}deg)`;
+          
+          setTimeout(() => {
+            (book as HTMLElement).style.transform = (book as HTMLElement).style.transform.replace(/rotateZ\([^)]*\)/, '');
+          }, 1000);
+        }, index * 2000 + Math.random() * 3000);
+      });
+    };
+
+    // Start random movements
+    addRandomMovement();
+    setInterval(addRandomMovement, 8000);
+  });
+</script>

@@ -1,0 +1,189 @@
+---
+---
+
+<header class="site-header">
+  <div class="container header-content">
+    <div class="logo">
+      <a href="/">Kagunda.dev</a>
+    </div>
+    <nav class="main-nav" id="main-nav">
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/tutorials">Tutorials</a></li>
+        <li><a href="/writings">Writings</a></li>
+        <li><a href="/library">Library</a></li>
+        <li><a href="#subscribe">Connect</a></li>
+      </ul>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode">
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M12 11.807A9.002 9.002 0 0 1 10.049 2a9.942 9.942 0 0 0-5.12 2.735c-3.905 3.905-3.905 10.237 0 14.142 3.906 3.906 10.237 3.906 14.143 0a9.946 9.946 0 0 0 2.735-5.119A9.003 9.003 0 0 1 12 11.807z"></path>
+        </svg>
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M12 0c-.414 0-.75.336-.75.75v3.5c0 .414.336.75.75.75s.75-.336.75-.75V.75C12.75.336 12.414 0 12 0zM4.35 4.35a.75.75 0 0 0-1.061 0L.98 6.66a.75.75 0 0 0 0 1.061.737.737 0 0 0 .53.22.753.753 0 0 0 .531-.22l2.308-2.308a.75.75 0 0 0 0-1.061zm16.361 0a.75.75 0 0 0-1.061 1.061l2.308 2.308a.75.75 0 0 0 1.061 0 .75.75 0 0 0 0-1.061l-2.308-2.308zM12 8.25A3.75 3.75 0 1 0 15.75 12 3.75 3.75 0 0 0 12 8.25zm0 6A2.25 2.25 0 1 1 14.25 12 2.253 2.253 0 0 1 12 14.25zM23.25 12c0-.414-.336-.75-.75-.75h-3.5c-.414 0-.75.336-.75.75s.336.75.75.75h3.5c.414 0 .75-.336.75-.75zM4.25 12c0-.414-.336-.75-.75-.75h-3.5C-.264 11.25 0 11.586 0 12s-.264.75 0 .75h3.5c.414 0 .75-.336.75-.75zM17.34 17.34a.75.75 0 0 0 1.061 0l2.308-2.308a.75.75 0 0 0 0-1.061.75.75 0 0 0-1.061 0l-2.308 2.308a.75.75 0 0 0 0 1.061zm-13-1.061a.75.75 0 0 0 0 1.061l2.308 2.308a.75.75 0 0 0 1.061 0 .75.75 0 0 0 0-1.061L5.4 16.28a.75.75 0 0 0-1.061 0zM12 18.75c-.414 0-.75.336-.75.75v3.5c0 .414.336.75.75.75s.75-.336.75-.75v-3.5c0-.414-.336-.75-.75-.75z"></path>
+        </svg>
+      </button>
+      <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle mobile menu">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M3 12h18M3 6h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] .site-header {
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo a {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    color: var(--heading-color);
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+
+  .main-nav ul {
+    display: flex;
+    list-style: none;
+    gap: 25px;
+  }
+
+  .main-nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 1rem;
+    position: relative;
+    padding-bottom: 5px;
+  }
+
+  .main-nav a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 1px;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--accent-color);
+    transition: width 0.3s ease;
+  }
+
+  .main-nav a:hover::after {
+    width: 100%;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .theme-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--accent-color);
+  }
+
+  .theme-toggle svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+  }
+
+  .icon-sun { display: none; }
+  [data-theme="dark"] .icon-moon { display: none; }
+  [data-theme="dark"] .icon-sun { display: block; }
+
+  .mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--heading-color);
+  }
+
+  .mobile-menu-toggle svg {
+    width: 30px;
+    height: 30px;
+    fill: none;
+    stroke: currentColor;
+  }
+
+  @media (max-width: 768px) {
+    .main-nav {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 20px 0;
+    }
+
+    [data-theme="dark"] .main-nav {
+      background: rgba(0, 0, 0, 0.2);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .main-nav.active {
+      display: block;
+    }
+
+    .main-nav ul {
+      flex-direction: column;
+      padding: 0 20px;
+      gap: 0;
+    }
+
+    .main-nav li {
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .main-nav a {
+      display: block;
+      padding: 12px 0;
+      font-size: 1.1rem;
+    }
+
+    .main-nav a:hover::after {
+      width: 60%;
+    }
+
+    .mobile-menu-toggle {
+      display: block;
+    }
+  }
+</style>
