@@ -1,0 +1,51 @@
+---
+// Create this as: src/pages/debug-collection.astro
+import { getCollection } from 'astro:content';
+
+const allBlogPosts = await getCollection('blog');
+
+console.log('\n🔍 COLLECTION DEBUG:');
+console.log('Total posts found:', allBlogPosts.length);
+
+allBlogPosts.forEach((post, index) => {
+  console.log(`\n📄 Post ${index + 1}:`);
+  console.log('  - id:', post.id);
+  console.log('  - slug:', post.slug);
+  console.log('  - collection:', post.collection);
+  console.log('  - title:', post.data?.title);
+  console.log('  - All keys:', Object.keys(post));
+  console.log('  - Raw post object:', JSON.stringify(post, null, 2));
+});
+---
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Collection Debug</title>
+  <style>
+    body { font-family: monospace; padding: 20px; background: #1a1a1a; color: #fff; }
+    pre { background: #2a2a2a; padding: 15px; border-radius: 8px; overflow: auto; }
+    .post { margin-bottom: 20px; padding: 15px; border: 1px solid #444; border-radius: 8px; }
+    .undefined { color: #ff6b6b; font-weight: bold; }
+    .defined { color: #51cf66; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Blog Collection Debug</h1>
+  <p>Total posts: <span class="defined">{allBlogPosts.length}</span></p>
+  
+  {allBlogPosts.map((post, index) => (
+    <div class="post">
+      <h3>Post {index + 1}</h3>
+      <p><strong>ID:</strong> <span class={post.id ? 'defined' : 'undefined'}>{post.id || 'undefined'}</span></p>
+      <p><strong>Slug:</strong> <span class={post.slug ? 'defined' : 'undefined'}>{post.slug || 'undefined'}</span></p>
+      <p><strong>Title:</strong> <span class="defined">{post.data?.title}</span></p>
+      <p><strong>Collection:</strong> <span class="defined">{post.collection}</span></p>
+      <details>
+        <summary>Full Object</summary>
+        <pre>{JSON.stringify(post, null, 2)}</pre>
+      </details>
+    </div>
+  ))}
+</body>
+</html>

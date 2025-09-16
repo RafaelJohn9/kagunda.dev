@@ -6,33 +6,33 @@ import ArticleCard from '../components/ArticleCard.astro';
 import Footer from '../components/Footer.astro';
 
 const tutorialPosts = await getCollection('blog', ({ data }) => {
-  return data.category === 'tutorials' && !data.draft;
+  return data.category === 'writings' && !data.draft;
 });
 
-const sortedTutorials = tutorialPosts.sort((a, b) => 
+const sortedWritings = tutorialPosts.sort((a, b) => 
   new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
 );
 ---
 
-<BaseLayout title="Tutorials">
+<BaseLayout title="Writings">
   <Header />
   
   <main>
     <section class="page-header">
       <div class="container">
         <h1>
-          <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100" height="100" fill="currentColor">
-                  <path d="M12 2L3 7v13h18V7L12 2zm0 2.3l6 3.6v1.1l-6-3.6-6 3.6V7.9l6-3.6zm-6 6.7l6 3.6 6-3.6v7.4H6v-7.4z"/>
+          <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="80" height="80" fill="currentColor">
+                  <path d="M21 6h-8l-2-2H3v16h18V6zm-2 12H5V8h14v10z"/>
           </svg>
         </h1>
-        <p>Embark on a journey where semicolons are sacred, bugs are rites of passage, and every crash is just the universe's way of saying, 'You're getting warmer.'</p>
+        <p><i>“Writing code is like writing a novel except the plot holes are called bugs, and the critics are your compiler.”</i></p>
       </div>
     </section>
 
     <section class="posts-grid-section">
       <div class="container">
         <div class="articles-grid">
-          {sortedTutorials.map((post) => (
+          {sortedWritings.map((post) => (
             <ArticleCard
               title={post.data.title}
               excerpt={post.data.description}

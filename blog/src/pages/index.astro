@@ -11,23 +11,27 @@ const allBlogPosts = await getCollection('blog', ({ data }) => {
   return !data.draft; // Make sure 'draft' is also defined in your schema!
 });
 
-// Sort by date (newest first) - ✅ Changed 'publishedAt' to 'pubDate'
+// Sort by date (newest first) - ✅
 const sortedPosts = allBlogPosts.sort((a, b) => 
   new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
 );
 
-// Get featured posts or latest 6 - ✅ Ensure 'featured' is in your schema
-const featuredPosts = sortedPosts.filter(post => post.data.featured).slice(0, 6) || 
-                     sortedPosts.slice(0, 6);
 
-// Separate posts by category - ✅ Ensure 'category' is in your schema
-const libraryPosts = sortedPosts.filter(post => post.data.category === 'library').slice(0, 2);
-const writingsPosts = sortedPosts.filter(post => post.data.category === 'writings').slice(0, 2);
-const tutorialsPosts = sortedPosts.filter(post => post.data.category === 'tutorials').slice(0, 2);
+// Separate posts by category, prioritizing featured posts and then taking the latest
+const getTopPosts = (category) => {
+  const categoryPosts = sortedPosts.filter(post => post.data.category === category);
+  const featuredPosts = categoryPosts.filter(post => post.data.featured);
+  const nonFeaturedPosts = categoryPosts.filter(post => !post.data.featured);
+
+  return [...featuredPosts, ...nonFeaturedPosts].slice(0, 3);
+};
+
+const libraryPosts = getTopPosts('library');
+const writingsPosts = getTopPosts('writings');
+const tutorialsPosts = getTopPosts('tutorials');
 
 // Get unique tags for popular topics
 const allTags = [...new Set(allBlogPosts.flatMap(post => post.data.tags))];
-const popularTags = allTags.slice(0, 8); // Show first 8 tags
 ---
 
 <BaseLayout title="">
@@ -57,7 +61,7 @@ const popularTags = allTags.slice(0, 8); // Show first 8 tags
                   title={post.data.title}
                   excerpt={post.data.description}
                   tags={post.data.tags}
-                  slug={post.slug}
+                  slug={post.data.slug ? post.data.slug :post.id}
                 />
               ))}
             </div>
@@ -81,7 +85,7 @@ const popularTags = allTags.slice(0, 8); // Show first 8 tags
                   title={post.data.title}
                   excerpt={post.data.description}
                   tags={post.data.tags}
-                  slug={post.slug}
+                  slug={post.data.slug ? post.data.slug :post.id}
                 />
               ))}
             </div>
@@ -105,7 +109,7 @@ const popularTags = allTags.slice(0, 8); // Show first 8 tags
                   title={post.data.title}
                   excerpt={post.data.description}
                   tags={post.data.tags}
-                  slug={post.slug}
+                  slug={post.data.slug ? post.data.slug :post.id}
                 />
               ))}
             </div>
@@ -118,11 +122,11 @@ const popularTags = allTags.slice(0, 8); // Show first 8 tags
       <div class="container">
         <h2>Explore My Library</h2>
         <ul class="topics-list">
-          {popularTags.map(tag => (
+            {allTags.map(tag => tag && (
             <li class="topic-badge">
-              <a href={`/tags/${tag?.toLowerCase().replace(/\s+/g, '-')}`}>{tag}</a>
+              <a href={`/tags/${tag.toLowerCase().replace(/\s+/g, '-')}`}>{tag}</a>
             </li>
-          ))}
+            ))}
         </ul>
       </div>
     </section>

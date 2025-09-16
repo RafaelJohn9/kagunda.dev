@@ -6,33 +6,33 @@ import ArticleCard from '../components/ArticleCard.astro';
 import Footer from '../components/Footer.astro';
 
 const tutorialPosts = await getCollection('blog', ({ data }) => {
-  return data.category === 'tutorials' && !data.draft;
+  return data.category === 'library' && !data.draft;
 });
 
-const sortedTutorials = tutorialPosts.sort((a, b) => 
+const sortedLibrary = tutorialPosts.sort((a, b) => 
   new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
 );
 ---
 
-<BaseLayout title="Tutorials">
+<BaseLayout title="Library">
   <Header />
   
   <main>
     <section class="page-header">
       <div class="container">
         <h1>
-          <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100" height="100" fill="currentColor">
-                  <path d="M12 2L3 7v13h18V7L12 2zm0 2.3l6 3.6v1.1l-6-3.6-6 3.6V7.9l6-3.6zm-6 6.7l6 3.6 6-3.6v7.4H6v-7.4z"/>
-          </svg>
+            <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="80" height="80" fill="currentColor">
+            <path d="M3 6v13c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6H3zm16 13H5V8h14v11zM8 10h2v7H8v-7zm4 0h2v7h-2v-7zm4 0h2v7h-2v-7z"/>
+            </svg>
         </h1>
-        <p>Embark on a journey where semicolons are sacred, bugs are rites of passage, and every crash is just the universe's way of saying, 'You're getting warmer.'</p>
+        <p><i>“Dive into my library books I’ve read, loved, and occasionally pretended to understand.”</i></p>
       </div>
     </section>
 
     <section class="posts-grid-section">
       <div class="container">
         <div class="articles-grid">
-          {sortedTutorials.map((post) => (
+          {sortedLibrary.map((post) => (
             <ArticleCard
               title={post.data.title}
               excerpt={post.data.description}

@@ -1,0 +1,165 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import Footer from '../../components/Footer.astro';
+
+// Export getStaticPaths to define all static tag URLs
+export async function getStaticPaths() {
+  const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+
+  const uniqueTags = [...new Set(
+    allPosts
+      .flatMap(post => post.data.tags || [])
+      .filter(tag => tag) // Remove any empty/null tags
+  )];
+
+  return uniqueTags.map(tag => ({
+    params: { tag: tag.toLowerCase().replace(/\s+/g, '-') }
+  }));
+}
+
+// Utility function to slugify tags
+function slugify(tag) {
+  return tag.toLowerCase().replace(/\s+/g, '-');
+}
+
+// Get all blog posts
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+
+// Create a mapping of real tags to their slugs
+const tagMapping = Object.fromEntries(
+  allPosts
+    .flatMap(post => post.data.tags || [])
+    .filter(tag => tag) // Remove any empty/null tags
+    .map(tag => [slugify(tag), tag])
+);
+
+// Get the tag from URL params
+const { tag } = Astro.params;
+
+// Get the real tag from the mapping
+const realTag = tagMapping[tag] || tag;
+
+// Filter posts by tag
+const filteredPosts = allPosts.filter((post) =>
+  Array.isArray(post.data.tags) && post.data.tags.some((postTag) => slugify(postTag) === tag)
+);
+
+// Sort posts by publication date
+const sortedPosts = filteredPosts.sort((a, b) =>
+  new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+);
+
+// Handle case where tag is missing or no posts found
+if (!tag || sortedPosts.length === 0) {
+  return new Response(null, {
+    status: 404,
+    statusText: !tag ? 'Tag not found' : 'No posts found for this tag'
+  });
+}
+
+---
+
+<BaseLayout title={`Tag: ${tag}`} description={`Articles tagged with ${tag}`}>
+  <Header />
+  
+  <main>
+    <section class="page-header">
+      <div class="container">
+        <h1>
+          <svg class="tag-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="60" height="60" fill="currentColor">
+            <path d="M5.5 7A1.5 1.5 0 0 1 4 5.5A1.5 1.5 0 0 1 5.5 4A1.5 1.5 0 0 1 7 5.5A1.5 1.5 0 0 1 5.5 7m15.91 4.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.41l8.99 9c.37.36.87.59 1.42.59c.55 0 1.05-.23 1.41-.59l7-7c.37-.36.59-.86.59-1.41c0-.56-.23-1.06-.59-1.42z"/>
+          </svg>
+            #{realTag}
+          </h1>
+          <p>Articles tagged with <strong>{realTag}</strong></p>
+        <div class="post-count">
+          {sortedPosts.length} {sortedPosts.length === 1 ? 'article' : 'articles'} found
+        </div>
+      </div>
+    </section>
+
+    <section class="posts-grid-section">
+      <div class="container">
+        <div class="articles-grid">
+          {sortedPosts.map((post) => (
+            <ArticleCard
+              title={post.data.title}
+              excerpt={post.data.description}
+              tags={post.data.tags || []}
+              slug={post.id}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .page-header {
+    padding: 80px 0 60px;
+    text-align: center;
+    background-color: var(--card-bg-color);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .page-header h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    color: var(--heading-color);
+  }
+
+  .tag-icon {
+    color: var(--accent-color);
+  }
+
+  .page-header p {
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto 10px;
+    color: var(--text-color);
+    font-style: italic;
+  }
+
+  .post-count {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    font-weight: 600;
+  }
+
+  .posts-grid-section {
+    padding: 80px 0;
+  }
+
+  .articles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+  }
+
+  @media (max-width: 768px) {
+    .page-header h1 {
+      font-size: 2.5rem;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .articles-grid {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    .posts-grid-section {
+      padding: 60px 0;
+    }
+  }
+</style>
