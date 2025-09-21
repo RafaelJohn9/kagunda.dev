@@ -4,7 +4,8 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://yoursite.com', // Replace with your actual domain
+  site: 'https://rafaeljohn9.github.io', // Replace with your actual domain
+  base:"/kagunda.dev/",
   integrations: [
     mdx(),
     sitemap(),
