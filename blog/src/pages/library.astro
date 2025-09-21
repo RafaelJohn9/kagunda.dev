@@ -20,6 +20,7 @@ const sortedLibrary = tutorialPosts.sort((a, b) =>
   <main>
     <section class="page-header">
       <div class="container">
+        <h2 class="library-heading">Library</h2>
         <h1>
             <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="80" height="80" fill="currentColor">
             <path d="M3 6v13c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6H3zm16 13H5V8h14v11zM8 10h2v7H8v-7zm4 0h2v7h-2v-7zm4 0h2v7h-2v-7z"/>
@@ -49,6 +50,11 @@ const sortedLibrary = tutorialPosts.sort((a, b) =>
 </BaseLayout>
 
 <style>
+  .library-heading {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: var(--heading-color);
+  }
   .page-header {
     padding: 80px 0 60px;
     text-align: center;

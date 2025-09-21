@@ -20,6 +20,7 @@ const sortedWritings = tutorialPosts.sort((a, b) =>
   <main>
     <section class="page-header">
       <div class="container">
+        <h2 class="writings-heading">Writings</h2>
         <h1>
           <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="80" height="80" fill="currentColor">
                   <path d="M21 6h-8l-2-2H3v16h18V6zm-2 12H5V8h14v10z"/>
@@ -49,6 +50,11 @@ const sortedWritings = tutorialPosts.sort((a, b) =>
 </BaseLayout>
 
 <style>
+  .writings-heading {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: var(--heading-color);
+  }
   .page-header {
     padding: 80px 0 60px;
     text-align: center;
