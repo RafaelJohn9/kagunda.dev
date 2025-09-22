@@ -44,6 +44,12 @@
 
 <!-- Mobile Sidebar -->
 <nav class="mobile-sidebar" id="mobile-sidebar">
+  <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close mobile menu">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <line x1="18" y1="6" x2="6" y2="18" stroke-width="2" stroke-linecap="round"/>
+      <line x1="6" y1="6" x2="18" y2="18" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
   <ul>
     <li><a href="/">Home</a></li>
     <li><a href="/tutorials">Tutorials</a></li>
@@ -218,6 +224,36 @@
     box-shadow: -5px 0 25px rgba(0, 0, 0, 0.1);
   }
 
+  /* Sidebar close button */
+  .sidebar-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--heading-color);
+    transition: all 0.2s ease;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar-close-btn:hover {
+    background: rgba(166, 124, 82, 0.1);
+    transform: scale(1.1);
+    color: var(--accent-color);
+  }
+
+  .sidebar-close-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+  }
+
   [data-theme="dark"] .mobile-sidebar {
     background: rgba(0, 0, 0, 0.2);
     box-shadow: -5px 0 25px rgba(0, 0, 0, 0.3);
@@ -304,6 +340,7 @@
     const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
     const mobileSidebar = document.getElementById('mobile-sidebar');
     const mobileOverlay = document.getElementById('mobile-overlay');
+    const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
     
     function toggleMobileMenu() {
       const isActive = mobileSidebar?.classList.contains('active');
@@ -328,6 +365,9 @@
     
     // Close menu when overlay is clicked
     mobileOverlay?.addEventListener('click', toggleMobileMenu);
+    
+    // Close menu when close button is clicked
+    sidebarCloseBtn?.addEventListener('click', toggleMobileMenu);
     
     // Close menu when a link is clicked
     const mobileLinks = document.querySelectorAll('.mobile-sidebar a');
