@@ -1,0 +1,147 @@
+---
+title: "OptiBiz AI  Intelligent Business Optimization Assistant"
+description: "The first-place winner in the Business category at JKUAT 2025 Hackathon  an AI-driven tool for startup product design and business decision optimization."
+pubDate: 2025-11-14
+tags: ["ai", "business", "hackathon", "product-design", "startup"]
+category: "writings"
+featured: true
+draft: false
+---
+
+import { Image } from 'astro:assets';
+import trophyImg from './trophy.png';
+import teamImg from './team.jpeg';
+
+> **Table of Contents:**
+>
+> - [Introduction](#introduction)
+> - [What is OptiBiz AI](#what-is-optibiz-ai)
+> - [Brief Overview of the Hackathon](#brief-overview-of-the-hackathon)
+> - [How Does It Work?](#how-does-it-work)
+> - [The Architecture of the Whole Application](#the-architecture-of-the-whole-application)
+> - [Challenges Faced](#challenges-faced)
+> - [What We Learned](#what-we-learned)
+> - [What We Intend to Do After That](#what-we-intend-to-do-after-that)
+> - [Conclusion](#conclusion)
+
+---
+
+## Introduction
+
+In Kenya, small and medium enterprises (SMEs) form the backbone of our economybut they’re often shackled by the invisible weight of manual, repetitive tasks. As someone who's worked closely with startups and local businesses, I’ve watched brilliant founders spend hours drafting invoices, scheduling calls, or chasing payments instead of focusing on growth.  
+
+That frustration became the spark for **OptiBiz AI**a project my team and I built during the **JKUAT 2025 Hackathon**. What started as a weekend idea evolved into a working prototype that won **1st place in the Business category**. This is the story of how we built it, what broke along the way, and why we believe AI shouldn’t live behind dashboardsbut in the conversations businesses already have.
+
+## What is OptiBiz AI
+
+OptiBiz AI is an **intelligent operations assistant** designed specifically for African SMEs. It lives inside **WhatsApp**a platform over 90% of Kenyan businesses already use dailyand automates core administrative functions through natural language.
+
+Powered by **Groq’s LPU technology**, it delivers ultra-fast AI inference while integrating with tools like:
+- Google Calendar & Gmail (for scheduling and email)
+- M-Pesa Daraja API (for instant STK payments)
+- Internal business databases (for real-time data)
+- Document generation engines (for invoices, reports, receipts)
+
+The result? A conversational interface where a simple message like *“Send Wanjiru an invoice for KES 25,000 and request payment”* triggers a fully automated workflow - no logins, no forms, no friction.
+
+## Brief Overview of the Hackathon
+
+The **JKUAT 2025 Hackathon** ran for two months and required teams to submit both a project idea and an execution plan. Our teamcomprising **John Kagunda (AI Engineer)**, **Calvin Chuma (Backend)**, **SherylAnn (UI/UX & Security)**, **John Maina (Frontend)**, and **Caleb Muuo (Backend)** pitched OptiBiz under the **Business category**.
+
+After acceptance, we spent weeks building, testing, and refining our prototype. On **November 14, 2025**, we presented live to a judging panel of industry leaders from **Oracle, Microsoft, Kenya Bureau of Statistics, and AdaptIT**.  
+
+When they announced our names as **first-place winners**, it wasn’t just validation it was proof that practical, locally grounded AI has a place in Africa’s startup future.
+
+## How Does It Work?
+
+At its core, OptiBiz AI turns WhatsApp into a **command-line for business operations**.
+
+Here’s how a typical interaction unfolds:
+
+> **User**: *"Schedule a strategy meeting with the sales team next Monday at 10 AM and attach last month’s revenue report."*
+
+**Behind the scenes**:
+1. Our Twilio-connected WhatsApp bot receives the message.
+2. The Groq-powered LLM parses intent and entities (action = schedule, participants = sales team, time = Monday 10 AM, document = revenue report).
+3. It queries Google Calendar for availability, creates the event, and emails invites.
+4. Simultaneously, it pulls sales data from our MySQL database, formats a PDF via a template engine, and attaches it to the calendar invite.
+5. A confirmation message is sent back via WhatsApp:  
+   > ✅ *Meeting scheduled for Monday, 10 AM. Revenue report attached. Invite sent to 5 team members.*
+
+All of this happens in under 5 seconds.
+
+## The Architecture of the Whole Application
+
+OptiBiz AI is built as a modular, event-driven system:
+
+- **Frontend Interface**: WhatsApp (via Twilio API)  no traditional UI needed.
+- **AI Core**: Python-based agent using Groq for ultra-low-latency LLM inference.
+- **Backend Services**:  
+  - FastAPI microservices handling calendar, email, payment, and document logic  
+  - MySQL for structured data (clients, invoices)  
+  - MongoDB for unstructured logs and conversation history  
+- **Integrations**:  
+  - Google Workspace APIs (Calendar, Gmail, Drive)  
+  - M-Pesa Daraja API (STK Push)  
+  - Twilio (WhatsApp messaging)  
+- **Admin Dashboard**: Built with React for user configuration and workflow monitoring (still in early prototype).
+
+Security was prioritized from day one: end-to-end message encryption, OAuth2 for third-party services, and strict role-based access control designed by SherylAnn.
+
+## Challenges Faced
+
+Building an AI agent that “just works” in real-world conditions was harder than we expected.
+
+- **WhatsApp rate limits**: Twilio enforces strict message quotas. We had to implement smart batching and user cooldowns.
+- **LLM hallucination**: Early versions would “invent” client names or payment amounts. We added schema validation layers and fallback confirmation prompts.
+- **M-Pesa sandbox instability**: During testing, the Daraja API would occasionally drop webhooks. We built retry queues with exponential backoff.
+- **Team coordination**: With five of us working remotely across different time zones, daily standups and GitHub Projects kept us aligned.
+
+But every bug fixed made the system more robustand more real.
+
+## What We Learned
+
+1. **Context matters more than complexity**  
+   A simple WhatsApp message beats a fancy dashboard if that’s where your users already are.
+
+2. **AI is an amplifier not a replacement**  
+   OptiBiz doesn’t replace humans; it frees them to do higher-value work.
+
+3. **Local problems need local solutions**  
+   Integrating M-Pesa wasn’t a “nice-to-have”it was essential. Global templates don’t cut it here.
+
+4. **Speed builds trust**  
+   Groq’s 200+ token/sec inference meant users got replies before they finished typing “...please.” That immediacy felt magical.
+
+5. **Hackathons reward execution, not ideas**  
+   Hundreds had great concepts. We won because we shipped a working, demoable product.
+
+## What We Intend to Do After That
+
+Winning was just the beginning. We’re now:
+
+- Onboarding **pilot partners** from Nairobi’s startup ecosystem (e-commerce, logistics, consulting).
+- Refining our **SaaS pricing model**:  
+  - **Freemium**: Basic M-Pesa invoicing (6 reports/year)  
+  - **Professional**: KES 1,500/user/month (email, calendar, docs)  
+  - **Business**: KES 3,000/user/month (unlimited reports, STK Push)  
+  - **Enterprise**: Custom deployments with SLAs
+- Seeking **seed funding** to scale infrastructure and expand integrations (e.g., Tally, QuickBooks, Sendy API).
+- Building a **React-based agent configuration portal** so non-technical founders can customize workflows.
+
+Long-term? We want OptiBiz to become the invisible co-founder every African SME never knew they needed.
+
+## Conclusion
+
+OptiBiz AI isn’t about flashy demos or AI hype. It’s about giving a small business owner in Thika or Kisumu the same operational leverage as a Silicon Valley startupusing nothing but the WhatsApp app they already open 50 times a day.
+
+This journey taught us that innovation in Africa doesn’t need permission. It just needs builders who listen, ship fast, and stay rooted in real needs.
+
+And as for us? We’re just getting started.
+
+{/* <img src={teamImg} alt="Our Team" width="400" height="300" /> */}
+{/* <Image src={trophyImg}  width={600} height={700} alt="First-place trophy from JKUAT 2025 Hackathon" /> */}
+
+
+### *Team*
+<Image src={teamImg}  width={400} height={500} alt="The OptiBiz AI development team" />
