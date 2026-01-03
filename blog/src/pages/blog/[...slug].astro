@@ -207,24 +207,24 @@ const formattedDate = entry.data.pubDate.toLocaleDateString("en-US", {
  /* Fallback: without <hr> */
  .post-content :global(blockquote:first-child  + h2 + p)::first-letter {
     float: left;
-    font-size: 3.5em;
+    font-size: 3.8em;
     line-height: 0.85;
     font-weight: bold;
     /* font-style: italic; */
     font-family: "Atkinson Hyperlegible", serif;
     color: var(--accent-color);
     margin-right: 0.01em;
-    margin-top: -0.1em;
+    margin-top: -0.01em;
   }
 
   /* Mobile: smaller screens */
   @media (max-width: 600px) {
     .post-content :global(blockquote:first-child + hr + h2 + p)::first-letter,
     .post-content :global(blockquote:first-child + h2 + p)::first-letter {
-      font-size: 2.6em; /* ~20–25% smaller */
+      font-size: 3em; /* ~20–25% smaller */
       line-height: 0.9; /* slightly more breathing room */
-      margin-right: 0.05em;
-      margin-top: -0.05em;
+      margin-right: 0.01em;
+      margin-top: 0.05em;
     }
   }
 
