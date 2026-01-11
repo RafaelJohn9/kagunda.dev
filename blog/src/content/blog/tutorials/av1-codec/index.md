@@ -152,7 +152,4 @@ AV1 is one expression of that care: open, efficient, and quietly powerful.
 You don’t have to adopt it everywhere today.  
 But maybe… try it on one video. Watch the file shrink. Test it on an old phone. Notice how nothing feels lost only lighter.
 
-And if your cousin in rural Kenya finally gets to watch that cat video without waiting 20 minutes?  
-Well. That’s the kind of small magic worth sharing.
-
 ---
