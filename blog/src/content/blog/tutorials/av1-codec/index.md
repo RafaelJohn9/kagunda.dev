@@ -79,9 +79,9 @@ By late 2025, about **30% of Netflix’s traffic** flows through AV1. Not all at
 
 Progress is rarely uniform. As of early 2026:
 
-✅ **Full support**: Chrome, Firefox, Edge, Android 10+, most smart TVs  
-⚠️ **Partial**: Safari only on iPhone 15 Pro and newer  
-❌ **Not yet**: Older iPhones, iPads, and many budget devices
+**Full support**: Chrome, Firefox, Edge, Android 10+, most smart TVs  
+**Partial**: Safari only on iPhone 15 Pro and newer  
+**Not yet**: Older iPhones, iPads, and many budget devices
 
 Globally, that covers roughly **82% of users**. Enough to matter but not enough to go all-in without a safety net.
 
