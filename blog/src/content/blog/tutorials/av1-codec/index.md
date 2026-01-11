@@ -16,7 +16,7 @@ draft: false
 > - [Why Netflix Started Whispering in AV1](#why-netflix-started-whispering-in-av1)
 > - [Who Can Actually Play AV1 Today?](#who-can-actually-play-av1-today)
 > - [The Quiet Trade-Off: Time for Space](#the-quiet-trade-off-time-for-space)
-> - [Try It Yourself Gently](#try-it-yourselfgently)
+> - [Try It Yourself Gently](#try-it-yourself-gently)
 >
 ---
 
