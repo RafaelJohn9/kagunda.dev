@@ -149,6 +149,12 @@ const formattedDate = entry.data.pubDate.toLocaleDateString("en-US", {
   .post-content {
     line-height: 1.8;
     font-size: 1.1rem;
+
+    color: var(--text-color);
+
+    @media (min-width: 1024px) {
+      font-size: 1.175rem;
+    }
   }
 
   .post-content :global(h2) {
