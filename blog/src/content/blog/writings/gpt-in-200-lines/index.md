@@ -19,7 +19,6 @@ draft: false
 > - [Step 5: Training Loop  Repetition Builds Intelligence](#step-5-training-loop--repetition-builds-intelligence)
 > - [Step 6: Inference  Making It Talk](#step-6-inference--making-it-talk)
 > - [Mental Model Recap](#mental-model-recap)
-> - [Exercises to Master This](#exercises-to-master-this)
 
 ---
 
