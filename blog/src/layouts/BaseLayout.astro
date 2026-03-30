@@ -12,6 +12,15 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="John Kagunda" />
+    <meta name="keywords" content="John Kagunda, developer, software engineer, web development" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="email" content="john@kagunda.dev" />
     <link
       rel="icon"
       type="image/x-icon"
