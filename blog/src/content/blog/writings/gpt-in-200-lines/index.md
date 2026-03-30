@@ -1,6 +1,6 @@
 ---
-title: "Build GPT From Scratch (200 Lines): The Simplest Way to Understand AI"
-description: "A Feynman-style walkthrough of Karpathy's 200-line GPT no magic, just clear ideas, simple math, and a working model."
+title: "What 200 Lines of Code Taught Me About How GPT Actually Thinks"
+description: "Turns out intelligence at its core is simpler than you'd expect. Here's what a 200-line GPT shows you when you slow down and look carefully."
 pubDate: 2026-03-30
 tags: ["gpt", "machine-learning", "transformers", "python", "beginner"]
 category: "tutorials"
