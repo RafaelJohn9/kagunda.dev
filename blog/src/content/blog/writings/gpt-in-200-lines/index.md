@@ -1,5 +1,5 @@
 ---
-title: "What 200 Lines of Code Taught Me About How GPT Actually Thinks"
+title: "Andrej Karpathy's 200-line GPT implementation"
 description: "Turns out intelligence at its core is simpler than you'd expect. Here's what a 200-line GPT shows you when you slow down and look carefully."
 pubDate: 2026-03-30
 tags: ["gpt", "machine-learning", "transformers", "python", "beginner"]
@@ -10,6 +10,7 @@ draft: false
 
 > **Table of Contents:**
 >
+> - [Why This Is Unique](#why-this-is-unique)
 > - [Why This Matters](#why-this-matters)
 > - [The Big Idea: Predict the Next Token](#the-big-idea-predict-the-next-token)
 > - [Step 1: Turning Text Into Numbers](#step-1-turning-text-into-numbers)
@@ -22,7 +23,13 @@ draft: false
 
 ---
 
+## Why This Is Unique
+
+Andrej Karpathy distilled the essence of GPT into ~200 readable lines of Python. That brevity makes the model's core ideas visible and inspectable: no fluff, just the mechanisms that enable next-token prediction. It's a rare pedagogical example that turns a deep research concept into something you can fully grasp by reading the code.
+
 ## Why This Matters
+
+
 
 Here's a belief most people carry without questioning it: GPT models are impossibly complex. The product of billions of dollars, thousands of researchers, and math so advanced that understanding it is simply not realistic for most people.
 
