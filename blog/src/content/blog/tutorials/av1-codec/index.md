@@ -1,5 +1,5 @@
 ---
-title: "How Do Netflix and YouTube Make Videos So Compact Without Ruining Quality?"
+title: "The Art of High-Quality Compression"
 description: "Spoiler: It's not magic it's AV1. And yes, you can use it too. Here's how, why, and whether your phone will cooperate."
 pubDate: 2026-01-11
 tags: ["video", "av1", "h264", "web-performance", "ffmpeg", "media", "optimization"]
