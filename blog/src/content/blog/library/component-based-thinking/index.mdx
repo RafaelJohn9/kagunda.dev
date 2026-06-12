@@ -13,18 +13,18 @@ draft: false
 >
 > - [Components Are Not Just Folders](#components-are-not-just-folders)
 > - [The Entity Trap — and Why Everyone Falls In](#the-entity-trap-and-why-everyone-falls-in)
-> - [How to Actually Identify Component Boundaries](#how-to-actually-identify-component-boundaries)
-> - [Coupling Is the Real Enemy](#coupling-is-the-real-enemy)
-> - [Cohesion: When Things Belong Together](#cohesion-when-things-belong-together)
-> - [The Component Contract: Interfaces Over Internals](#the-component-contract-interfaces-over-internals)
-> - [Granularity: How Big Is a Component?](#granularity-how-big-is-a-component)
-> - [Components Evolve — And That's the Point](#components-evolve-and-thats-the-point)
+> - [How to Actually Find the Boundaries](#how-to-actually-find-the-boundaries)
+> - [Coupling Is the Hidden Tax](#coupling-is-the-hidden-tax)
+> - [Cohesion: Does This Actually Belong Here?](#cohesion-does-this-actually-belong-here)
+> - [The Contract: What You Show vs. What You Hide](#the-contract-what-you-show-vs-what-you-hide)
+> - [Granularity: How Big Should a Component Be?](#granularity-how-big-should-a-component-be)
+> - [Components Change — And That's Fine](#components-change-and-thats-fine)
 
 ---
 
 # Components Are Not Just Folders
 
-Here's a confession: most engineers, early in their careers, think component-based thinking means "put related files in the same folder."
+Okay, real talk. When most engineers first hear "component-based architecture," they picture something like this:
 
 ```
 project/
@@ -42,26 +42,28 @@ project/
     └── product_routes.py
 ```
 
-Neat, right? Every new engineer will know where to look. But look closely — this isn't component thinking. This is **layer thinking wearing a component costume.** The "components" here are `models`, `services`, and `routes` — not `user`, `order`, or `product`. The actual business domain has been split *horizontally* across three folders, when it should be sliced *vertically* into self-contained units.
+Clean. Predictable. Every new team member will know where to find things. Looks like good component design, right?
 
-This is the starting confusion, and it shapes everything else. So let's define what a component actually is.
+Not quite. Look at what's actually being grouped here — `models`, `services`, `routes`. Those are *layers*, not components. The real business concepts — `user`, `order`, `product` — have been chopped up *horizontally* and scattered across three folders. If you want to understand anything about how an order works, you have to look in three different places.
 
-> A **component** is a deployable or logically separable unit of functionality with a defined boundary and a controlled interface. Other parts of the system interact with it *through* that interface — not by reaching into its internals.
+This is what architects call **layer thinking wearing a component costume.** It's not wrong exactly, but it's not component thinking either.
 
-The key word is *boundary*. A folder is a directory. A component has a *contract* — a public surface — and everything behind that surface is implementation detail you don't have to care about from the outside.
+So what *is* a component?
 
-The moment you start thinking about components as contracts rather than containers, architecture starts to click.
+> A **component** is a self-contained unit of functionality with a clear boundary and a public interface. Other parts of the system talk to it *through* that interface — they don't reach inside and grab things directly.
+
+The shift in mindset is going from "where do files go?" to "what are this system's moving parts, and how do they talk to each other?" Once you start seeing systems that way, a lot of architectural decisions become much less ambiguous.
 
 ---
 
 # The Entity Trap — and Why Everyone Falls In
 
-The entity trap is so common it deserves its own section, its own warning sign, and possibly its own support group.
+Here's the other classic mistake, and I promise you've either seen it or written it yourself.
 
-It happens when you decompose your system by *data entities* rather than *business capabilities*. You look at your database schema and think: "I have users, orders, products, and payments — so I'll make a component for each."
+You're designing a new system. You open your database schema. You see `users`, `orders`, `products`, `payments`. So you think: "I'll make a component for each one." Makes sense, right? One component per table.
 
 ```python
-# The Entity Trap — your system mirrored to your schema
+# Looks organized.
 
 class UserComponent:
     def create_user(self, data): ...
@@ -81,15 +83,12 @@ class PaymentComponent:
     # ... you see where this is going
 ```
 
-This looks organized. It's not.
+The problem shows up the moment you try to do anything real. "Place an order" isn't just one component's job — it touches *all* of them. You need `UserComponent` to validate the user, `OrderComponent` to create the record, `PaymentComponent` to charge the card, and probably something for notifications too.
 
-Here's why: every real business operation spans multiple entities. "Place an order" needs `UserComponent` (is the user valid?), `OrderComponent` (create the order record), `PaymentComponent` (charge the card), and probably a notification somewhere. Who orchestrates this? Usually, the answer becomes a `checkout_service.py` that imports from all four components and contains the actual business logic that the components were supposed to encapsulate.
-
-You've accidentally recreated the Big Ball of Mud — just with more import statements.
+So where does that logic live? It ends up in a `checkout_service.py` that someone writes to "just orchestrate things." And three months later it looks like this:
 
 ```python
-# What checkout_service.py looks like three months in.
-# Congratulations, you've built a god-service.
+# checkout_service.py — your new Big Ball of Mud, now with extra imports
 
 class CheckoutService:
     def __init__(self):
@@ -100,268 +99,238 @@ class CheckoutService:
         self.notifications = NotificationComponent()
 
     def place_order(self, user_id, cart):
-        user = self.users.get_user(user_id)             # reach into UserComponent
-        if not self.inventory.check_stock(cart):        # reach into InventoryComponent
+        user = self.users.get_user(user_id)
+        if not self.inventory.check_stock(cart):
             raise OutOfStockError()
-        order = self.orders.create_order(user, cart)    # reach into OrderComponent
-        self.payments.charge(user.payment_method, ...)  # reach into PaymentComponent
-        self.notifications.send_confirmation(user, ...) # reach into NotificationComponent
+        order = self.orders.create_order(user, cart)
+        self.payments.charge(user.payment_method, ...)
+        self.notifications.send_confirmation(user, ...)
         return order
 ```
 
-The entity components are just anemic data shells. The real logic lives elsewhere. The decomposition was cosmetic.
+Your "components" became hollow CRUD wrappers. The actual business logic migrated out of them and into a service that now knows everything about everyone. The decomposition was cosmetic.
 
-## The Fix: Decompose by Capability, Not Entity
+This is the **Entity Trap**: organizing around what your data *looks like* instead of what your system *does*.
 
-Instead of asking "what data do I have?", ask **"what does my system need to be able to *do*?"**
+## The fix is simple, but it requires a mindset shift
+
+Stop asking "what data do I have?" Start asking **"what does this system need to be able to *do*?"**
 
 ```python
-# Capability-oriented decomposition
+# Organized around capabilities — things the system actually does
 
 class OrderManagement:
-    """Everything related to the lifecycle of an order."""
+    """Everything about an order's lifecycle."""
 
-    def place_order(self, user_id: str, cart: Cart) -> Order:
-        """Orchestrates validation, creation, and confirmation."""
-        ...
-
-    def cancel_order(self, order_id: str, reason: str) -> Order:
-        ...
-
-    def process_return(self, order_id: str, items: list) -> Refund:
-        ...
+    def place_order(self, user_id: str, cart: Cart) -> Order: ...
+    def cancel_order(self, order_id: str, reason: str) -> Order: ...
+    def process_return(self, order_id: str, items: list) -> Refund: ...
 
 
 class PaymentProcessing:
-    """Everything related to money moving in and out."""
+    """Everything about money moving in and out."""
 
-    def charge(self, payment_method: PaymentMethod, amount: Money) -> ChargeResult:
-        ...
-
-    def refund(self, charge_id: str, amount: Money) -> RefundResult:
-        ...
-
-    def dispute(self, charge_id: str, reason: str) -> DisputeCase:
-        ...
+    def charge(self, method: PaymentMethod, amount: Money) -> ChargeResult: ...
+    def refund(self, charge_id: str, amount: Money) -> RefundResult: ...
+    def dispute(self, charge_id: str, reason: str) -> DisputeCase: ...
 
 
 class InventoryControl:
-    """Everything related to stock and availability."""
+    """Everything about stock and availability."""
 
-    def reserve(self, sku: str, quantity: int) -> Reservation:
-        ...
-
-    def release(self, reservation_id: str) -> None:
-        ...
-
-    def restock(self, sku: str, quantity: int) -> None:
-        ...
+    def reserve(self, sku: str, quantity: int) -> Reservation: ...
+    def release(self, reservation_id: str) -> None: ...
+    def restock(self, sku: str, quantity: int) -> None: ...
 ```
 
-Now "process a return" has an obvious home: `OrderManagement.process_return()`. It internally uses `PaymentProcessing.refund()` and `InventoryControl.release()` — through their public interfaces — and nobody outside cares how it does it.
+Now "process a return" has an obvious home: `OrderManagement.process_return()`. Internally it calls `PaymentProcessing.refund()` and `InventoryControl.release()` — but those are just conversations between components. Nobody outside needs to know the details.
 
-The boundary reflects the domain. That's what components are for.
+The structure now reflects what the business actually *does*, not what the database schema looks like. That's a meaningful difference.
 
 ---
 
-# How to Actually Identify Component Boundaries
+# How to Actually Find the Boundaries
 
-The hardest part of component design isn't knowing the theory. It's that you're usually looking at an existing system with tangled responsibilities and trying to find the seams — the natural split points that aren't yet visible.
+Okay, so you want to find good component boundaries. Theory is nice, but in practice you're staring at an existing codebase full of files with overlapping responsibilities and no obvious seams. Where do you even start?
 
-Here are three techniques that actually work:
+Here are three questions that help:
 
-## 1. Follow the Rate of Change
+## "What code always changes together?"
 
-Things that change together should live together. Things that change for different reasons should live apart.
+When a feature request comes in, which files do you always end up touching at the same time? If `order_service.py` and `notification_service.py` move in lockstep — every order change also changes the notification logic — that's a sign they might be one component in disguise.
 
-Ask yourself: when a business requirement changes, what code gets touched? If you always touch `order_service.py` *and* `notification_service.py` together for every feature, that's a hint those two are logically coupled — and might belong in the same component. If `payment_service.py` only changes when the payment provider changes, that's a clean boundary.
-
-This is Robert C. Martin's *Common Closure Principle* applied practically: **components should be closed to the same kinds of changes.**
+The flip side is also true: if `payment_service.py` only ever changes when the payment provider updates their API, that's a clean boundary. Payment logic has its own reason to exist and its own reason to change.
 
 ```python
-# These two change together — they're probably the same component
-# (order state changes always trigger customer notifications)
+# If these always change together, they probably belong together.
 
-# order_service.py
 def cancel_order(order_id: str) -> Order:
     order = repo.get(order_id)
     order.status = OrderStatus.CANCELLED
     repo.save(order)
-    notify_customer_of_cancellation(order)  # ← always here
+    notify_customer_of_cancellation(order)  # always here, every time
     return order
-
-# They're logically one operation. The boundary is around the whole thing.
 ```
 
-## 2. Look for Seams in the Data Flow
+## "Where does the data change shape?"
 
-Draw (even mentally) how data flows through your system for a key operation. Where does it pause? Where does format change? Where does ownership transfer from one "team" to another conceptually?
-
-Those pauses and transfers are often natural component boundaries.
+Trace a request through your system. Where does raw input become a typed object? Where does a business decision produce an event that other parts react to? Those handoffs — where something transforms or responsibility shifts — are often where component boundaries belong.
 
 ```
 HTTP Request
     │
     ▼
-[Request Validation]  ← seam: raw input becomes a typed command
+[Request Validation]   ← raw input becomes a typed command
     │
     ▼
-[Order Management]    ← seam: business decision made, order state changes
+[Order Management]     ← business decision is made, order state changes
     │
     ▼
-[Payment Processing]  ← seam: money moves, external system invoked
+[Payment Processing]   ← money moves, external system is called
     │
     ▼
-[Event Publication]   ← seam: downstream systems notified asynchronously
+[Event Publication]    ← downstream systems are notified
 ```
 
-Each arrow in this diagram is a candidate component boundary.
+Each arrow here is a candidate boundary. You're not drawing components yet — you're just noticing where "who's responsible" changes.
 
-## 3. Ask What Could Be Versioned Independently
+## "What could have its own version number?"
 
-If you had to put a version number on each piece of your system, what would be a natural unit? `PaymentProcessing v2.3.1` makes sense — it has its own release cadence driven by provider API changes. `The-CRUD-wrapper-around-the-orders-table v1.0.0` doesn't mean anything.
+`PaymentProcessing v2.3.1` is a meaningful statement — it has its own release cadence, its own changelog, its own reason to bump a version. `The-CRUD-wrapper-around-the-orders-table v1.0.0` doesn't mean anything, because it has no independent identity.
 
-This "independent versioning" test is also the test for whether something is a *real* component or just a group of files.
+If something couldn't meaningfully have its own version, it's probably not really a component yet.
 
 ---
 
-# Coupling Is the Real Enemy
+# Coupling Is the Hidden Tax
 
-Coupling is the hidden tax on every architectural shortcut.
+Every time you reach across a component boundary without going through the proper interface, you're taking on a little debt. Just a small import here, a quick access to an internal method there. No big deal.
 
-When you import `UserComponent` directly into `OrderManagement`, you've coupled them. If `UserComponent` changes its interface, `OrderManagement` breaks. If you want to test `OrderManagement`, you need `UserComponent` too. If you want to deploy a new version of `OrderManagement`, you'd better check what `UserComponent` looks like right now.
+Until day 400, when you have 60 modules all tangled together in ways that no single person fully understands, and changing anything feels like defusing a bomb.
 
-None of this is obvious on day one. It becomes obvious on day 400, when you have 60 modules, all importing from each other in ways no single person can fully hold in their head.
+That's coupling. It's not dramatic when it happens. It accumulates quietly.
 
-## Types of Coupling: A Bestiary
+## Not all coupling is the same
 
-Not all coupling is equally bad. Here's a rough taxonomy, from "fine" to "you're going to regret this":
+Some coupling is fine — actually, it's unavoidable. Here's a rough ladder from "this is totally okay" to "you will regret this":
 
-**Data Coupling** — components share data through well-defined interfaces (function arguments, return values, message payloads). This is *good* coupling. It's unavoidable.
+**Data coupling** — you pass data in, you get data back. Clean function arguments and return types. This is how components *should* talk to each other.
 
 ```python
-# Data coupling — clean
-def process_return(order_id: str, items: list[ReturnItem]) -> Refund:
-    ...
+# Totally fine
+def process_return(order_id: str, items: list[ReturnItem]) -> Refund: ...
 ```
 
-**Stamp Coupling** — components share a complex data structure, but only use part of it. This is a yellow flag: it means the interface carries more information than it needs to.
+**Stamp coupling** — you pass in a big object but only use two fields from it. Not terrible, but worth noticing — it means the interface is carrying more weight than it needs to.
 
 ```python
-# Stamp coupling — passing the full Order object when only order.id is needed
+# Yellow flag — why does send_confirmation need the whole Order object?
 def send_confirmation(order: Order) -> None:
-    # only uses order.user_email and order.id
     send_email(order.user_email, f"Your order {order.id} is confirmed.")
+    # only used order.user_email and order.id
 ```
 
-**Control Coupling** — one component tells another *how* to behave by passing flags. A sign of confused responsibilities.
+**Control coupling** — you pass in a flag that tells a function how to behave. This usually means one function is secretly trying to be two.
 
 ```python
-# Control coupling — the caller controls the callee's logic
-def process_payment(amount, method, send_receipt=True, log_to_audit=True):
-    ...
+# Hmm. Why does the caller decide whether to send a receipt?
+def process_payment(amount, method, send_receipt=True, log_to_audit=True): ...
 ```
 
-**Content Coupling** — one component directly accesses the internal state or implementation of another. This is the worst. It makes the "component" boundary fictional.
+**Content coupling** — one module directly touches the internal state or private implementation of another. The boundary is now fictional.
 
 ```python
-# Content coupling — reaching into internals
-# order_management.py
-from payment_processing import _stripe_client  # ← accessing a private implementation detail
+# order_management.py — this is bad
+from payment_processing import _stripe_client  # reaching into internals
 
 def refund_directly(charge_id):
-    _stripe_client.refunds.create(charge=charge_id)  # bypasses PaymentProcessing entirely
+    _stripe_client.refunds.create(charge=charge_id)  # bypassed PaymentProcessing entirely
 ```
 
-The moment content coupling exists, you don't have two components — you have one component that's been awkwardly split across two files.
+Once you have content coupling, the two "components" are really just one component awkwardly split across two files.
 
-## The Dependency Rule
+## Point dependencies toward stability
 
-A useful heuristic borrowed from Clean Architecture: **dependencies should point inward, toward stability.** High-level business logic shouldn't depend on low-level infrastructure. `OrderManagement` shouldn't depend on `StripeClient` directly — it should depend on a `PaymentGateway` abstraction, and the infrastructure layer wires up the Stripe implementation.
+A useful rule from Clean Architecture: business logic shouldn't depend on infrastructure details. `OrderManagement` shouldn't care that you're using Stripe. Tomorrow you might switch to M-Pesa. Next year you might switch again.
 
 ```python
-# Without the dependency rule
+# Bad — OrderManagement is now married to Stripe
 class OrderManagement:
     def __init__(self):
         import stripe
-        self.stripe = stripe  # ← OrderManagement now knows about Stripe. Why?
+        self.stripe = stripe
 
 
-# With the dependency rule
+# Good — OrderManagement depends on a contract, not an implementation
 class PaymentGateway(Protocol):
     def charge(self, method: PaymentMethod, amount: Money) -> ChargeResult: ...
     def refund(self, charge_id: str, amount: Money) -> RefundResult: ...
 
 class OrderManagement:
     def __init__(self, payments: PaymentGateway):
-        self.payments = payments  # ← depends on abstraction. Stripe could be swapped for M-Pesa tomorrow.
+        self.payments = payments  # could be Stripe, M-Pesa, or a test mock
 ```
 
-This is also why dependency injection isn't just a Java pattern. It's how you enforce the dependency rule in any language.
+This is dependency injection — and it's not a Java thing or a framework thing. It's just the practical way to make sure your business logic doesn't get glued to your infrastructure.
 
 ---
 
-# Cohesion: When Things Belong Together
+# Cohesion: Does This Actually Belong Here?
 
-If coupling is about *how* components connect, cohesion is about *what* belongs inside a single component.
+Coupling is about how components *connect*. Cohesion is about what belongs *inside* one component.
 
-A component is cohesive when everything inside it exists for the same reason and changes for the same reason. When you open the file and everything makes sense as part of a single story — that's cohesion.
+A cohesive component has one clear job. Everything inside it exists for the same reason and changes for the same reason. When you open the file, it tells a single story.
 
-Richards and Ford reference the *Lack of Cohesion in Methods* (LCOM) metric, which is a formal measure of how many instance variables each method in a class uses. The higher the LCOM score, the less cohesive the class. But you don't need to calculate LCOM to feel it. You can usually *smell* low cohesion.
-
-## The Smell Test
-
-Ask yourself: "Can I describe what this component does in one sentence, without the word 'and'?"
+You don't need a metric to feel low cohesion. Just ask yourself: **can I describe what this component does in one sentence, without using the word "and"?**
 
 ```python
-# Low cohesion — can't describe this without multiple "ands"
-# "It handles orders AND sends notifications AND generates PDF invoices AND validates addresses"
+# Low cohesion — this is doing at least four different jobs
 class OrderService:
     def create_order(self, cart): ...
-    def send_order_confirmation(self, order): ...    # notification concern
-    def generate_invoice_pdf(self, order): ...      # document generation concern
-    def validate_delivery_address(self, address): ... # validation concern
+    def send_order_confirmation(self, order): ...    # notification job
+    def generate_invoice_pdf(self, order): ...      # document job
+    def validate_delivery_address(self, address): ... # validation job
     def get_estimated_delivery(self, order): ...
 ```
 
+vs.
+
 ```python
-# Higher cohesion — each class has a single, defensible purpose
+# Each of these tells one story
 class OrderLifecycle:
-    """Manages order state transitions."""
+    """Manages how orders move between states."""
     def create(self, cart: Cart) -> Order: ...
     def confirm(self, order_id: str) -> Order: ...
     def cancel(self, order_id: str, reason: str) -> Order: ...
 
 class OrderNotifier:
-    """Responsible for all customer communication about orders."""
+    """Handles all customer communication around orders."""
     def send_confirmation(self, order: Order) -> None: ...
     def send_cancellation(self, order: Order) -> None: ...
     def send_delivery_update(self, order: Order, status: str) -> None: ...
 
 class InvoiceGenerator:
-    """Generates financial documents for orders."""
+    """Turns order data into financial documents."""
     def generate_pdf(self, order: Order) -> bytes: ...
     def generate_receipt(self, order: Order) -> Receipt: ...
 ```
 
-Now each class has a single story. `OrderLifecycle` is about state transitions. `OrderNotifier` is about communication. `InvoiceGenerator` is about documents. When the PDF library changes, only `InvoiceGenerator` cares.
+Now when your PDF library releases a new version, only `InvoiceGenerator` cares. When your email provider changes, only `OrderNotifier` moves. That's the practical value of cohesion — it makes changes *local*.
 
-## Cohesion and Team Topology
-
-Here's a pattern worth noticing: **low-cohesion components tend to be owned by multiple people with unclear responsibility.** When a file does five different things, five different engineers contribute to it, nobody feels fully responsible for it, and it accumulates complexity from all directions.
-
-High-cohesion components tend to have clearer ownership. "The payments team owns `PaymentProcessing`" is a coherent sentence. "The payments team owns everything except the PDF generation in `OrderService`" is a sign something went wrong.
+There's also a human angle here. Low-cohesion components tend to be owned by nobody in particular. When a file does five things, five engineers all touch it, nobody feels responsible for it, and it grows in all directions at once. High-cohesion components have a natural owner. "Who owns the payment component?" is an answerable question. "Who owns the order service?" — when it does everything — is not.
 
 ---
 
-# The Component Contract: Interfaces Over Internals
+# The Contract: What You Show vs. What You Hide
 
-The most important thing a component exposes is its interface — and the most important rule is that other components should only ever interact through it.
+Here's a thing Python makes easy to ignore: access control.
 
-In Python, this means being deliberate about what's public and what isn't. Python doesn't enforce access control as strictly as Java or C++, but conventions exist for a reason.
+In Java or C++, `private` is enforced by the compiler. In Python, it's a convention — an underscore prefix means "this is internal, please don't touch it." Lots of engineers skip this entirely and end up with components where everything is technically public, so other parts of the system gradually start depending on internals that were never meant to be stable.
+
+The fix is to think of your `__init__.py` as your component's front door. Everything you put in there is the public contract. Everything else is an implementation detail.
 
 ```python
-# payment_processing/gateway.py  — public interface, the contract
+# payment_processing/gateway.py — this is the contract
 
 from typing import Protocol
 
@@ -370,23 +339,21 @@ class PaymentGateway(Protocol):
     def refund(self, charge_id: str, amount: Money) -> RefundResult: ...
 
 
-# payment_processing/_stripe.py  — internal implementation, the detail
-# The underscore prefix signals: "don't import this from outside the component"
+# payment_processing/_stripe.py — this is the implementation
+# The leading underscore says "don't import this from outside"
 
 class _StripeGateway:
     def __init__(self, api_key: str):
         self._client = stripe.Client(api_key)
 
     def charge(self, method: PaymentMethod, amount: Money) -> ChargeResult:
-        # Stripe-specific implementation
         ...
 
     def refund(self, charge_id: str, amount: Money) -> RefundResult:
         ...
 
 
-# payment_processing/__init__.py  — what the component exposes
-# This file IS the boundary. Import from here or not at all.
+# payment_processing/__init__.py — the front door
 
 from .gateway import PaymentGateway
 from ._stripe import _StripeGateway
@@ -395,135 +362,128 @@ def create_gateway(config: Config) -> PaymentGateway:
     return _StripeGateway(config.stripe_api_key)
 ```
 
-Now when `OrderManagement` imports from `PaymentProcessing`, it imports `PaymentGateway` and `create_gateway` from the `__init__.py`. It never touches `_StripeGateway` directly. When you swap to M-Pesa or a different provider, you add a new `_mpesa.py`, update `create_gateway`, and nothing in `OrderManagement` changes.
+Now `OrderManagement` imports `PaymentGateway` and `create_gateway` from `payment_processing`. That's all it ever sees. When you swap in an M-Pesa implementation, you add `_mpesa.py`, update `create_gateway`, and `OrderManagement` doesn't even know anything changed.
 
-This is a component with a real contract.
+That's a real component boundary.
 
-## Versioning the Contract
+## A small thing that matters a lot: breaking vs. non-breaking changes
 
-A mature component also versions its contract. Not every change is a breaking change — adding an optional parameter isn't, changing a return type is. Understanding this distinction is what allows a team to evolve a component without disrupting every caller at once.
+Once you're thinking about components as contracts, you start caring about whether changes break the callers.
 
 ```python
-# Non-breaking: adding an optional parameter
+# Non-breaking — adding an optional parameter is safe
 def charge(
     self,
     method: PaymentMethod,
     amount: Money,
-    idempotency_key: str | None = None,  # new, optional — callers don't need to change
+    idempotency_key: str | None = None,  # callers can ignore this
 ) -> ChargeResult: ...
 
 
-# Breaking: changing the return type (even subtly)
+# Breaking — changing the return type will silently break callers
 # Before:
 def refund(self, charge_id: str, amount: Money) -> RefundResult: ...
 
-# After (breaking — callers that check result.success will break):
-def refund(self, charge_id: str, amount: Money) -> dict: ...
+# After:
+def refund(self, charge_id: str, amount: Money) -> dict: ...  # ← callers expecting .success will break
 ```
 
-Treating interface changes as versioned contracts is the mindset shift that separates engineers who just write components from engineers who design systems other people can build on.
+This isn't pedantic. On a real team, knowing the difference between "I can ship this without coordinating" and "I need to talk to three other teams first" is the difference between moving fast and causing incidents.
 
 ---
 
-# Granularity: How Big Is a Component?
+# Granularity: How Big Should a Component Be?
 
-This is the question with no clean answer — but there are heuristics that help.
+No clean answer here. But there are signs you've gone too far in either direction.
 
-**Too large:** If your component has 30 public methods across 5 different concerns, it's not really a component — it's a module that hasn't been decomposed yet. The smell: you can't describe it without "and."
+**Too big:** Your component has 30 public methods covering five different concerns. You can't describe it without the word "and." It has multiple teams contributing to it, and nobody fully owns it.
 
-**Too small:** If your component only wraps a single function or contains three lines of logic, the boundary is probably costing more in coordination overhead than it saves in isolation. The smell: you always deploy it with two other components at the same time.
+**Too small:** Your component is a three-line wrapper around one function. Deploying it requires deploying two other components at the same time. It has no independent reason to exist.
 
-**The Goldilocks test:**
+A useful gut check — the "Goldilocks test":
 
-1. **Independently deployable** — can you change and ship this component without deploying others?
-2. **Independently testable** — can you write unit tests for this without standing up the whole system?
-3. **Owned by one team** — is there a clear owner who understands the full component?
+1. Can you change and ship this component without touching others?
+2. Can you write tests for it without standing up the whole system?
+3. Is there one person (or team) who clearly owns it?
 
-If all three are true, the granularity is roughly right. If any is false, adjust accordingly.
+If all three are yes, the size is probably right. If any is no, something's off.
 
-Here's the heuristic Richards and Ford implicitly point toward, made explicit:
+A rough mental spectrum:
 
 ```
 Too small ←————————————————————————————→ Too large
 
-  3-line      1 function      1 capability      1 domain      "Everything"
-  wrapper     wrapper         (ideal zone)      aggregate     service
+  3-line      single         one             one domain      "everything"
+  wrapper     function       capability      aggregate       service
+                             ↑
+                         sweet spot
 ```
 
-A "capability" — like `OrderManagement` or `PaymentProcessing` — is usually the right unit. It maps to something a business stakeholder can name and a single team can own.
+A "capability" — something like `OrderManagement` or `PaymentProcessing` — is usually the right unit. It maps to something a business person can name, and a single team can own.
 
 ---
 
-# Components Evolve — And That's the Point
+# Components Change — And That's Fine
 
-Here's the thing that trips up a lot of architects: they think component design is a one-time activity. Design the boundaries on day one, enforce them forever, done.
+Here's something that trips people up: they think component design is a one-time decision. You draw the boundaries on day one, and then you enforce them forever.
 
-But systems aren't static. What was the right decomposition at 10,000 users may be wrong at 10 million. What was right for a three-person team may be wrong for a thirty-person org. What started as a single `OrderManagement` component may need to split into `OrderCreation`, `OrderFulfillment`, and `OrderReturns` as the business logic in each grows complex enough to justify separation.
+But systems grow. What's the right decomposition for a three-person startup is not the right decomposition for a thirty-person team. A single `OrderManagement` component might eventually need to split into `OrderCreation`, `OrderFulfillment`, and `OrderReturns` because each has grown complex enough to deserve its own home.
 
-This is normal, expected, and not a sign that the original design was wrong.
+That's not a sign the original design was wrong. That's just how software works.
 
-## Recognizing When a Component Needs to Split
+## Signs a component wants to split
 
-Watch for these signals:
-
-**The component touches too many of the system's cross-cutting concerns.** If `OrderManagement` is involved in authentication decisions, database migrations, email formatting, and payment logic — something has gone wrong. Extract the cross-cutting concerns into their own components.
-
-**The component has multiple "cores."** If you can identify two or more groups of methods that never call each other's private helpers, the component has two personalities. They should probably be two components.
+**It's doing too many separate things.** If you can find two groups of methods inside a component that *never call each other*, you basically already have two components — they just share a file.
 
 ```python
 class OrderService:
-    # Core 1: stateful order lifecycle
+    # Group 1: order state management
     def create_order(self): ...
-    def _validate_cart(self): ...       # only called by create_order
-    def _check_inventory(self): ...     # only called by create_order
+    def _validate_cart(self): ...     # only called by create_order
+    def _check_inventory(self): ...   # only called by create_order
 
-    # Core 2: reporting and analytics
+    # Group 2: reporting
     def get_daily_summary(self): ...
-    def export_to_csv(self): ...        # only called by get_daily_summary
-    def _format_report_row(self): ...   # only called by export_to_csv
+    def export_to_csv(self): ...      # only called by get_daily_summary
+    def _format_row(self): ...        # only called by export_to_csv
 
-# These two cores don't share anything. Split them.
+# Group 1 and Group 2 never interact. These are already two components.
 ```
 
-**Different teams are stepping on each other's changes.** If three engineers consistently create merge conflicts in the same file, the component boundary is wrong — it's a team ownership problem wearing a technical costume.
+**Multiple teams keep bumping into each other.** Consistent merge conflicts in the same file are a signal. It's a team ownership problem that looks like a technical problem.
 
-## Recognizing When Components Need to Merge
+## Signs two components should merge
 
-The reverse also happens. Sometimes a boundary that seemed clean turns out to be artificial, and the two components are so tightly coordinated that they're deployed together, tested together, and changed together. At that point, the boundary is just overhead.
+The opposite also happens. Sometimes a boundary looks clean on paper but in practice the two components always move together — always deployed together, always changed together, always tested together. At that point, the boundary is just overhead.
 
 ```python
-# If you always do this:
+# If you always do these two things in the same breath...
 order = order_management.create(cart)
-order_search_index.index(order)      # always happens after create, in the same transaction
+search_index.index(order)
 
-# Maybe OrderManagement and OrderSearchIndex aren't really two components.
-# Maybe search is just a feature of order management.
+# ...maybe search is just a feature of order management, not a separate component.
 ```
 
-The goal is never "maximum decomposition" — it's *appropriate* decomposition given the current size, team structure, and operational requirements of the system.
+The goal isn't maximum decomposition. It's *appropriate* decomposition — for your current team size, system complexity, and operational needs. That target moves as your system grows.
 
 ---
 
-## Putting It Together: A Practical Mental Model
+## Putting It Together
 
-When you're looking at a new system (or trying to clean up an old one), here's the thinking process:
+When you're looking at a system and trying to make sense of how it should be structured, here's a thinking process that actually helps:
 
-1. **List the capabilities**, not the entities. What does this system need to *do*? Verbs, not nouns.
+1. **Write down what the system does.** Not what data it stores — what it *does*. Verbs.
+2. **Group those verbs** by "what would change for the same reason?" Those clusters are your candidate components.
+3. **Name each component** like a business person would. If you can't explain it to a non-technical stakeholder, the boundary might not be real.
+4. **Define the interface** — what does the outside world see? What's hidden?
+5. **Check the dependencies** — does anything reach into internals? Replace those with abstractions.
+6. **Ask the one-sentence question** for each: if you can't describe it without "and," split it.
+7. **Revisit in six months.** Seriously, put it in your calendar.
 
-2. **Group the capabilities** into clusters that change for the same reason. These are your candidate components.
+The goal isn't a perfect architecture diagram. It's building the habit of making intentional choices — about boundaries, about what's public, about who owns what — and revisiting those choices as the system evolves.
 
-3. **Define the interface** for each candidate: what does the outside world need to know? What's an implementation detail?
-
-4. **Check the dependencies**: do any components depend on internals of others? Fix those with abstractions and dependency injection.
-
-5. **Check the cohesion**: can each component be described in one sentence without "and"? If not, split.
-
-6. **Check the coupling**: can each component be tested in isolation? If not, something is reaching across a boundary it shouldn't.
-
-7. **Revisit regularly.** Set a reminder. Components that were right six months ago may not be right today.
-
-Component-based thinking is less about finding the perfect diagram on day one and more about building a habit of asking the right questions continuously. The goal isn't perfect structure — it's *intention*. A system where every boundary exists for a reason, every interface is deliberate, and every component has an owner.
-
-That's a system you can actually work in.
+A system where every boundary has a reason and every component has an owner is a system you can actually work in without dreading every change.
 
 ---
+
+*Next up: **Architecture Styles** — how these same ideas play out at the whole-system level. Layered monoliths, event-driven systems, microservices — when each one makes sense, and what you're trading away when you pick one.*
