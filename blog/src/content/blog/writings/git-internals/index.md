@@ -13,6 +13,7 @@ draft: false
 > - [Git Is Not What You Think It Is](#git-is-not-what-you-think-it-is)
 > - [The .git Folder: Everything Git Knows](#the-git-folder-everything-git-knows)
 > - [The Four Objects](#the-four-objects)
+> - [Wait — a full snapshot every commit? Isn't that huge?](#wait--a-full-snapshot-every-commit-isnt-that-huge)
 > - [What Actually Happens When You Commit](#what-actually-happens-when-you-commit)
 > - [Branches Are Just Text Files](#branches-are-just-text-files)
 > - [The Staging Area Is a Real Thing](#the-staging-area-is-a-real-thing)
