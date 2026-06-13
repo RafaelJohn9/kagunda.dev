@@ -50,7 +50,7 @@ refs/
 Picture this like a filing cabinet. The drawers are:
 
 - **`objects/`** — every file, directory snapshot, and commit ever recorded. This is the database.
-- **`refs/`** — your branches and tags. Just sticky notes with a commit ID written on them.
+- **`refs/`** — your branches and tags. Just files with a commit ID written on them.
 - **`HEAD`** — a file that says "you are here."
 
 And the wild part? You can read most of this with `cat`.
@@ -85,6 +85,21 @@ Most people think git stores diffs — the changes between versions. It doesn't.
 
 The key insight: each object's ID is a hash of its content. Same content = same hash, always. This is what makes git trustworthy — you literally cannot have two different files with the same ID.
 
+---
+### "Wait — a full snapshot every commit? Isn't that huge?"
+ 
+Good instinct. The answer is: not really, and here's why.
+ 
+Remember that blobs store *content*, not filenames. So if you commit 50 files and only change one of them, git writes exactly one new blob. The other 49 already exist in the object store — the new tree just points to the same blobs as before. No duplication.
+ 
+![alt text](image-7.svg)
+ 
+`README.md` and `utils.py` didn't change — both commits point to the exact same blobs. Git stored them once.
+ 
+On top of that, git periodically runs **packfiles** — it compresses similar objects together and stores only the deltas between them, similar to what you'd expect from a diff-based system. So your `.git` folder stays surprisingly lean even on long-lived projects.
+ 
+The snapshot model buys you simplicity and speed. The storage efficiency is handled quietly in the background.
+ 
 ---
 
 ## What Actually Happens When You Commit
