@@ -1,6 +1,6 @@
 ---
 title: "Chaos Algorithms Made Simple: Finding Order in Apparent Randomness"
-description: "A beginner-friendly guide to chaos algorithms—what they are, how they work, and why they’re useful—even if you’ve never heard of chaos theory before."
+description: "A beginner-friendly guide to chaos algorithms—what they are, how they work, and why they’re useful."
 pubDate: 2025-12-24
 tags: ["algorithms", "chaos-theory", "beginner", "optimization", "problem-solving"]
 category: "tutorials"
