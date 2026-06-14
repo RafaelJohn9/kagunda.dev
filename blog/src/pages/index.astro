@@ -69,6 +69,8 @@ const allTags = [...new Set(allBlogPosts.flatMap(post => post.data.tags))];
                   />
                 ))}
               </div>
+              <br />
+              <a href={href} class="more-in-category">More</a>
             </div>
           )
         ))}
@@ -143,7 +145,7 @@ const allTags = [...new Set(allBlogPosts.flatMap(post => post.data.tags))];
   .category-title {
     font-size: 1.8rem;
     margin-bottom: 30px;
-    display: flex;
+    display: inline-block;
     align-items: center;
     gap: 10px;
     border-bottom: 2px solid var(--border-color);
@@ -204,6 +206,28 @@ const allTags = [...new Set(allBlogPosts.flatMap(post => post.data.tags))];
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 30px;
     margin-top: 40px;
+  }
+
+  .more-in-category{
+    background-color: var(--heading-color);
+    color: var(--bg-color);
+    border: none;
+    padding: 10px 25px;
+    margin: auto;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Lora', serif;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    white-space: nowrap;
+    display: block;
+    width: fit-content;
+    margin: 0 auto;
+  }
+
+  .more-in-category:hover {
+    background-color: var(--accent-color);
   }
 
   #popular-topics h2 {
