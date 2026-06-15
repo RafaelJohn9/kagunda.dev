@@ -35,6 +35,10 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
       href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Playfair+Display:wght@700&display=swap"
       rel="stylesheet"
     />
+    <script type="module">
+      import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+      mermaid.initialize({ startOnLoad: true, theme: 'light' });
+    </script>
   </head>
   <body data-theme="dark">
     <slot />
@@ -253,12 +257,38 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
 
   /* Target only fenced code blocks */
   pre {
-    background-color: #302b26 !important;
-    display: block;
-    padding: 1rem;
-    border-radius: 6px;
-    overflow-x: auto;
+  background-color: #302b26 !important;
+  display: block;          /* <-- Changed from inline-block */
+  width: 100%;               /* <-- Ensures it fills the parent */
+  max-width: 100%;         /* <-- Prevents it from pushing the page width */
+  padding: 1rem;
+  border-radius: 6px;
+  overflow-x: auto;
+  white-space: pre;        /* <-- Keeps code formatting intact */
+}
+
+  /* Glass-like styling for mermaid diagrams */
+  pre.mermaid {
+    background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    background-color: rgba(48, 43, 38, 0.35) !important;
+    backdrop-filter: blur(8px) saturate(120%);
+    -webkit-backdrop-filter: blur(8px) saturate(120%);
+    border: 1px solid rgba(255,255,255,0.06);
+    box-shadow: 0 8px 24px rgba(10, 10, 10, 0.45);
+    color: var(--text-color);
+    padding: 1.25rem;
+    border-radius: 12px;
+    overflow: hidden;
   }
+
+  /* Ensure mermaid svg/code inside inherits the glass background and is readable */
+  pre.mermaid svg,
+  pre.mermaid code {
+    background: transparent !important;
+    color: inherit;
+  }
+
+
 
   a {
     color: var(--accent-color);

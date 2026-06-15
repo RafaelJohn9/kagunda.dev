@@ -1,6 +1,19 @@
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
+import { visit } from 'unist-util-visit';
+
+
+function remarkMermaid() {
+  return (tree) => {
+    visit(tree, 'code', (node) => {
+      if (node.lang === 'mermaid') {
+        node.type = 'html';
+        node.value = `<pre class="mermaid">${node.value}</pre>`;
+      }
+    });
+  };
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -19,6 +32,8 @@ export default defineConfig({
     },
     // Enable GitHub-flavored markdown
     gfm: true,
+    // Enable Mermaid diagrams in markdown
+    remarkPlugins: [remarkMermaid],
   },
   // Vite configuration for better development experience
   vite: {
