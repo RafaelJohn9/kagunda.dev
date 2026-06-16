@@ -1,7 +1,7 @@
 ---
 title: "How to Do Great Work"
 description: "By Paul Graham"
-pubDate: 2026-06-15
+pubDate: 2026-06-16
 tags: ["productivity", "career", "paul-graham", "self-improvement", "essays"]
 category: "library"
 featured: true
