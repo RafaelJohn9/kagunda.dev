@@ -70,6 +70,13 @@ const { title, excerpt, tags, slug, date } = Astro.props;
     overflow: hidden;
   }
 
+  @media (max-width: 600px) {
+    .excerpt {
+      -webkit-line-clamp: unset;
+      overflow: visible;
+    }
+  }
+
   .row-meta {
     display: flex;
     align-items: center;
