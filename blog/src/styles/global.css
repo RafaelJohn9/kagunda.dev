@@ -117,6 +117,24 @@ pre {
 pre > code {
 	all: unset;
 }
+
+/* global.css, or wherever your Astro/MDX styles live */
+pre {
+  overflow-x: auto;
+  white-space: pre;      /* don't wrap — this is the actual fix */
+  -webkit-overflow-scrolling: touch; /* smooth momentum scroll on iOS */
+}
+
+pre code {
+  white-space: inherit;  /* make sure Shiki's <code> doesn't re-wrap it */
+  display: block;
+}
+
+pre.astro-code {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 blockquote {
 	border-left: 4px solid var(--accent);
 	padding: 0 0 0 20px;
@@ -153,3 +171,5 @@ hr {
 	/* added line to stop words getting smushed together (as they go onto separate lines and some screen readers do not understand line feeds as a space */
 	white-space: nowrap;
 }
+
+

@@ -28,7 +28,7 @@ export default defineConfig({
     shikiConfig: {
       theme: 'github-dark',
       // Alternative themes: 'github-light', 'dracula', 'nord', 'monokai'
-      wrap: true,
+      wrap: false, // Disable line wrapping for better readability of code blocks
     },
     // Enable GitHub-flavored markdown
     gfm: true,
