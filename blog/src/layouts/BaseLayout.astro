@@ -95,6 +95,54 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
             });
           });
         }
+
+        function addCopyButtons() {
+          document.querySelectorAll("pre.astro-code").forEach((pre) => {
+            if (pre.querySelector(".copy-btn")) return;
+
+            const wrapper = document.createElement("div");
+            wrapper.className = "code-wrapper";
+            pre.parentNode?.insertBefore(wrapper, pre);
+            wrapper.appendChild(pre);
+
+            const button = document.createElement("button");
+            button.className = "copy-btn";
+            button.setAttribute("aria-label", "Copy code");
+            button.innerHTML = `
+              <span class="copy-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2"/>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+              </span>
+              <span class="check-icon" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </span>
+            `;
+
+            button.addEventListener("click", async () => {
+              const code = pre.querySelector("code")?.innerText ?? pre.innerText;
+              try {
+                await navigator.clipboard.writeText(code);
+                button.classList.add("copied");
+                button.setAttribute("aria-label", "Copied");
+                setTimeout(() => {
+                  button.classList.remove("copied");
+                  button.setAttribute("aria-label", "Copy code");
+                }, 1500);
+              } catch (err) {
+                console.error("Copy failed", err);
+              }
+            });
+
+            wrapper.appendChild(button);
+          });
+        }
+
+        addCopyButtons();
+        document.addEventListener("astro:page-load", addCopyButtons);
       });
     </script>
   </body>
@@ -266,6 +314,43 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
   overflow-x: auto;
   white-space: pre;        /* <-- Keeps code formatting intact */
 }
+
+  .code-wrapper {
+    position: relative;
+  }
+
+  .copy-btn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    padding: 0.45rem;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--card-bg-color);
+    color: var(--text-color);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .copy-btn .check-icon {
+    display: none;
+  }
+
+  .copy-btn.copied .copy-icon {
+    display: none;
+  }
+
+  .copy-btn.copied .check-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .copy-btn.copied {
+    opacity: 0.7;
+  }
 
   /* Glass-like styling for mermaid diagrams */
   pre.mermaid {
