@@ -46,7 +46,9 @@ const allTags = [...new Set(allBlogPosts.flatMap(post => post.data.tags))];
         
         {
           (() => {
-            const articles = [...tutorialsPosts, ...writingsPosts, ...libraryPosts];
+            const articles = [...tutorialsPosts, ...writingsPosts, ...libraryPosts].sort(
+              (a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
+            );
             return (
               articles.length > 0 && (
                 <div class="category-section">
