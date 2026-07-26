@@ -96,27 +96,38 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
           });
         }
 
+        // Code block header: language label on the left, copy button
+        // on the right, sitting above the <pre> so nothing in a full
+        // first line of code is ever hidden under the button.
         function addCopyButtons() {
           document.querySelectorAll("pre.astro-code").forEach((pre) => {
-            if (pre.querySelector(".copy-btn")) return;
+            // avoid double-wrapping on repeat calls (e.g. astro:page-load)
+            if (pre.parentElement?.classList.contains("code-block")) return;
 
             const wrapper = document.createElement("div");
-            wrapper.className = "code-wrapper";
+            wrapper.className = "code-block";
             pre.parentNode?.insertBefore(wrapper, pre);
-            wrapper.appendChild(pre);
+
+            const header = document.createElement("div");
+            header.className = "code-header";
+
+            const lang = document.createElement("span");
+            lang.className = "code-lang";
+            lang.textContent = pre.getAttribute("data-language") || "text";
+            header.appendChild(lang);
 
             const button = document.createElement("button");
             button.className = "copy-btn";
             button.setAttribute("aria-label", "Copy code");
             button.innerHTML = `
               <span class="copy-icon" aria-hidden="true">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <rect x="9" y="9" width="13" height="13" rx="2"/>
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                 </svg>
               </span>
               <span class="check-icon" aria-hidden="true">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="20 6 9 17 4 12"></polyline>
                 </svg>
               </span>
@@ -137,7 +148,9 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
               }
             });
 
-            wrapper.appendChild(button);
+            header.appendChild(button);
+            wrapper.appendChild(header);
+            wrapper.appendChild(pre);
           });
         }
 
@@ -319,38 +332,84 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
     position: relative;
   }
 
-  .copy-btn {
-    position: absolute;
-    top: 0.75rem;
-    right: 0.75rem;
-    padding: 0.45rem;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    background: var(--card-bg-color);
-    color: var(--text-color);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
+  /* Code block header — language label on the left, copy button on the
+   right, sitting above the <pre> so nothing in the code itself is
+   ever covered. */
+.code-block {
+	margin: 30px 0;
+	border-radius: 8px;
+	overflow: hidden; /* clips pre's own radius so only code-block's shows */
+	border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+}
 
-  .copy-btn .check-icon {
-    display: none;
-  }
+.code-block pre {
+	margin: 0; /* header now owns the block's outer spacing */
+	border-radius: 0; /* header sits on top, only code-block gets rounded corners */
+	border: none;
+}
 
-  .copy-btn.copied .copy-icon {
-    display: none;
-  }
+.code-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.5rem 0.9rem;
+	background: rgba(255, 255, 255, 0.04);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
 
-  .copy-btn.copied .check-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
+.code-lang {
+	font-family: monospace;
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: rgba(255, 255, 255, 0.45);
+}
 
-  .copy-btn.copied {
-    opacity: 0.7;
-  }
+.copy-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.35rem;
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 6px;
+	color: #e1e4e8;
+	cursor: pointer;
+	transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.copy-btn:hover {
+	background: rgba(255, 255, 255, 0.14);
+}
+
+/* Icon swap: show copy icon by default, check icon only when .copied */
+.copy-btn .check-icon {
+	display: none;
+}
+
+.copy-btn.copied {
+	color: #3fb950;
+	border-color: rgba(63, 185, 80, 0.4);
+}
+
+.copy-btn.copied .copy-icon {
+	display: none;
+}
+
+.copy-btn.copied .check-icon {
+	display: inline-flex;
+}
+
+/* Small phones: shrink the header a touch so it doesn't eat width
+   from an already-narrow code block. */
+@media (max-width: 480px) {
+	.code-header {
+		padding: 0.4rem 0.7rem;
+	}
+	.copy-btn .copy-label {
+		display: none; /* icon-only on very small screens */
+	}
+}
 
   /* Glass-like styling for mermaid diagrams */
   pre.mermaid {
