@@ -155,6 +155,13 @@ const formattedDate = entry.data.pubDate.toLocaleDateString("en-US", {
     @media (min-width: 1024px) {
       font-size: 1.175rem;
     }
+
+    /* Small phones: step below the 0.9rem mobile default so long
+       paragraphs and code don't dominate a narrow screen. */
+    @media (max-width: 480px) {
+      font-size: 0.85rem;
+      line-height: 1.7;
+    }
   }
 
   .post-content :global(h2) {
@@ -192,19 +199,31 @@ const formattedDate = entry.data.pubDate.toLocaleDateString("en-US", {
     border: 1px solid var(--border-color);
   }
 
+  /* Code blocks — scroll on overflow instead of wrapping (pairs with
+     shikiConfig.wrap: false in astro.config.mjs), plus a mobile step
+     down in padding/font-size so blocks don't overwhelm a phone screen. */
   .post-content :global(pre) {
     background-color: var(--card-bg-color);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 20px;
     overflow-x: auto;
+    white-space: pre;
+    -webkit-overflow-scrolling: touch;
     margin: 30px 0;
+    font-size: 0.95em;
+
+    @media (max-width: 600px) {
+      padding: 14px;
+      font-size: 0.85em;
+    }
   }
 
   .post-content :global(pre code) {
     background: none;
     border: none;
     padding: 0;
+    white-space: inherit;
   }
 
   /* Drop cap for first paragraph in blog posts */
