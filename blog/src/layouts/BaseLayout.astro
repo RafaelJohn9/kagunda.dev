@@ -338,14 +338,16 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
 .code-block {
 	margin: 30px 0;
 	border-radius: 8px;
-	overflow: hidden; /* clips pre's own radius so only code-block's shows */
-	border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+	overflow: hidden;
+	background-color: #302b26; /* same dark surface as pre — header and code now read as one block */
+	/* border: 1px solid rgba(255, 255, 255, 0.08); */
 }
 
 .code-block pre {
-	margin: 0; /* header now owns the block's outer spacing */
-	border-radius: 0; /* header sits on top, only code-block gets rounded corners */
+	margin: 0;
+	border-radius: 0;
 	border: none;
+	background-color: transparent !important; /* let .code-block's bg show through instead of stacking */
 }
 
 .code-header {
@@ -353,8 +355,8 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
 	align-items: center;
 	justify-content: space-between;
 	padding: 0.5rem 0.9rem;
-	background: rgba(255, 255, 255, 0.04);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+	background-color: #26211d; /* a touch darker than the code area — separation without a hard border */
+	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .code-lang {
@@ -362,7 +364,7 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
 	font-size: 0.75rem;
 	text-transform: uppercase;
 	letter-spacing: 0.04em;
-	color: rgba(255, 255, 255, 0.45);
+	color: rgba(255, 255, 255, 0.5); /* fixed light text — the code surface is always dark, not theme-dependent */
 }
 
 .copy-btn {
@@ -370,19 +372,18 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
 	align-items: center;
 	justify-content: center;
 	padding: 0.35rem;
-	background: rgba(255, 255, 255, 0.06);
-	border: 1px solid rgba(255, 255, 255, 0.12);
+	background: rgba(255, 255, 255, 0.08);
+	border: 1px solid rgba(255, 255, 255, 0.14);
 	border-radius: 6px;
-	color: #e1e4e8;
+	color: #e1e4e8; /* fixed light icon color, same reasoning */
 	cursor: pointer;
 	transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .copy-btn:hover {
-	background: rgba(255, 255, 255, 0.14);
+	background: rgba(255, 255, 255, 0.16);
 }
 
-/* Icon swap: show copy icon by default, check icon only when .copied */
 .copy-btn .check-icon {
 	display: none;
 }
@@ -400,17 +401,14 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
 	display: inline-flex;
 }
 
-/* Small phones: shrink the header a touch so it doesn't eat width
-   from an already-narrow code block. */
 @media (max-width: 480px) {
 	.code-header {
 		padding: 0.4rem 0.7rem;
 	}
 	.copy-btn .copy-label {
-		display: none; /* icon-only on very small screens */
+		display: none;
 	}
 }
-
   /* Glass-like styling for mermaid diagrams */
   pre.mermaid {
     background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
