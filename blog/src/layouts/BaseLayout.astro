@@ -532,4 +532,20 @@ const { title, description = "My Developer's Chapter" } = Astro.props;
         );
     }
   }
+
+  .prose {
+  font-size: 1.125rem; /* your normal desktop body size */
+}
+
+@media (max-width: 640px) {
+  .prose {
+    font-size: 0.01rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .prose {
+    font-size: 0.09375rem;
+  }
+}
 </style>
