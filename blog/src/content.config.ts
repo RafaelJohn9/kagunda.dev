@@ -5,11 +5,10 @@ const blog = defineCollection({
   loader: glob({ 
     base: './src/content/blog', 
     pattern: '**/*.{md,mdx}',
-    // Add this to help with slug generation
-    generateId: ({ entry, base }) => {
-      // This will use the relative path from base as the ID/slug
-      return entry.replace(base, '').replace(/^\//, '').replace(/\.(md|mdx)$/, '');
-    }
+    // Use the path relative to the collection as the id/slug, dropping the
+    // extension and a trailing "/index" so `writings/foo/index.md` -> `writings/foo`.
+    generateId: ({ entry }) =>
+      entry.replace(/\.(md|mdx)$/, '').replace(/\/index$/, ''),
   }),
   schema: ({ image }) =>
     z.object({
