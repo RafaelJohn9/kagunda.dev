@@ -35,7 +35,15 @@ const formattedDate = entry.data.pubDate.toLocaleDateString("en-US", {
 });
 ---
 
-<BaseLayout title={entry.data.title} description={entry.data.description}>
+<BaseLayout
+  title={entry.data.title}
+  description={entry.data.description}
+  ogImage={`/og/${entry.id.replace(/\/index$/, "")}.png`}
+  type="article"
+  publishedTime={entry.data.pubDate}
+  modifiedTime={entry.data.updatedDate}
+  tags={entry.data.tags}
+>
   <Header />
 
   <main>
