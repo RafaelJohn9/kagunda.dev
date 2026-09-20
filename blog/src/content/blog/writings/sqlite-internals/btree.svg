@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" font-family="system-ui, sans-serif" font-size="13">
+  <style>
+    .box{fill:none;stroke:currentColor;stroke-width:1.5}
+    .line{stroke:currentColor;stroke-width:1.5;fill:none}
+    text{fill:currentColor}
+    .dim{opacity:.65;font-size:12px}
+  </style>
+  <rect class="box" x="220" y="20" width="200" height="44" rx="6"/>
+  <text x="320" y="40" text-anchor="middle">Root (interior page)</text>
+  <text x="320" y="56" text-anchor="middle" class="dim">≤ 40,000 | ≤ 80,000 | …</text>
+
+  <rect class="box" x="60" y="130" width="180" height="44" rx="6"/>
+  <text x="150" y="150" text-anchor="middle">Interior page</text>
+  <text x="150" y="166" text-anchor="middle" class="dim">≤ 400 | ≤ 800 | …</text>
+  <rect class="box" x="400" y="130" width="180" height="44" rx="6"/>
+  <text x="490" y="150" text-anchor="middle">Interior page</text>
+  <text x="490" y="166" text-anchor="middle" class="dim">≤ 80,400 | … </text>
+
+  <path class="line" d="M290 64 L150 130 M350 64 L490 130"/>
+
+  <rect class="box" x="10" y="240" width="130" height="44" rx="6"/>
+  <text x="75" y="260" text-anchor="middle">Leaf page</text>
+  <text x="75" y="276" text-anchor="middle" class="dim">rows 1 – 126</text>
+  <rect class="box" x="155" y="240" width="130" height="44" rx="6"/>
+  <text x="220" y="260" text-anchor="middle">Leaf page</text>
+  <text x="220" y="276" text-anchor="middle" class="dim">rows 127 – 252</text>
+  <rect class="box" x="350" y="240" width="130" height="44" rx="6"/>
+  <text x="415" y="260" text-anchor="middle">Leaf page</text>
+  <text x="415" y="276" text-anchor="middle" class="dim">rows …</text>
+  <rect class="box" x="495" y="240" width="130" height="44" rx="6"/>
+  <text x="560" y="260" text-anchor="middle">Leaf page</text>
+  <text x="560" y="276" text-anchor="middle" class="dim">rows …</text>
+
+  <path class="line" d="M110 174 L75 240 M190 174 L220 240 M450 174 L415 240 M530 174 L560 240"/>
+</svg>
