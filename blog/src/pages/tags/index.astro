@@ -1,0 +1,121 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+
+const slugify = (tag: string) => tag.toLowerCase().replace(/\s+/g, '-');
+
+// Count articles per topic, merging tags that share a slug (e.g. "Web3" / "web3")
+const posts = await getCollection('blog', ({ data }) => !data.draft);
+const topics = new Map<string, { name: string; count: number }>();
+for (const tag of posts.flatMap((post) => post.data.tags ?? []).filter(Boolean)) {
+  const slug = slugify(tag);
+  const topic = topics.get(slug) ?? { name: tag, count: 0 };
+  topic.count += 1;
+  topics.set(slug, topic);
+}
+const sorted = [...topics].sort(([, a], [, b]) => b.count - a.count || a.name.localeCompare(b.name));
+const max = Math.max(...sorted.map(([, t]) => t.count));
+---
+
+<BaseLayout title="Topics" description="Every topic written about on kagunda.dev.">
+  <Header />
+
+  <main>
+    <section class="page-header">
+      <div class="container">
+        <p class="kicker">The card catalogue</p>
+        <h1>Topics</h1>
+        <p class="intro">{sorted.length} subjects, most written about first.</p>
+      </div>
+    </section>
+
+    <section class="topics">
+      <div class="container">
+        <ul>
+          {sorted.map(([slug, topic]) => (
+            <li>
+              <a href={`/tags/${slug}`} style={`--weight: ${topic.count / max}`}>
+                <span class="name">{topic.name.replace(/-/g, ' ')}</span>
+                <span class="count">{topic.count}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .page-header {
+    padding: 80px 0 30px;
+    text-align: center;
+  }
+
+  .kicker {
+    margin: 0 0 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-color);
+  }
+
+  .page-header h1 {
+    font-size: 3rem;
+    color: var(--heading-color);
+    margin-bottom: 12px;
+  }
+
+  .intro {
+    font-style: italic;
+  }
+
+  .topics ul {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .topics a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 8px 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--card-bg-color);
+    color: var(--heading-color);
+    text-decoration: none;
+    /* busier topics get a slightly bigger card */
+    font-size: calc(0.9rem + var(--weight) * 0.35rem);
+    box-shadow: 2px 2px 0 var(--border-color);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .topics a:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 0 0 0 var(--border-color);
+  }
+
+  .name {
+    font-weight: 700;
+    font-variant: small-caps;
+    letter-spacing: 0.03em;
+  }
+
+  .count {
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--accent-color);
+  }
+</style>

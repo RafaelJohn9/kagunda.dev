@@ -35,7 +35,10 @@ function remarkMermaid() {
 export default defineConfig({
   site: 'https://kagunda.dev',
   base: "/",
-  redirects: legacyIndexRedirects(),
+  redirects: {
+    ...legacyIndexRedirects(),
+    '/archive': '/blog',
+  },
   integrations: [
     mdx(),
     sitemap(),
