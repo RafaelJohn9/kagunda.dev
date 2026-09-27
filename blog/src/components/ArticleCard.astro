@@ -1,6 +1,7 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import { getFolders } from '../folders';
+import { LEVELS, readingTime, splitTags } from '../reading';
 
 export interface Props {
   post: CollectionEntry<'blog'>;
@@ -17,18 +18,9 @@ const volume = folders.findIndex((f) => f.id === post.data.series);
 const folder = volume >= 0 ? folders[volume] : undefined;
 const chapter = folder ? folder.posts.findIndex((p) => p.id === post.id) + 1 : 0;
 
-// Reading time, measured in coffee
-const words = (post.body ?? '').split(/\s+/).filter(Boolean).length;
-const minutes = Math.max(1, Math.round(words / 230));
-const brew = minutes <= 6 ? 'an espresso' : minutes <= 15 ? 'a cup' : 'a pot';
-
-// Difficulty tags become coffee beans; the rest are subjects
-const LEVELS = ['beginner', 'intermediate', 'advanced'];
-const level = LEVELS.findIndex((l) => tags.map((t) => t.toLowerCase()).includes(l)) + 1;
-const subjects = tags
-  .filter((t) => !LEVELS.includes(t.toLowerCase()))
-  .slice(0, 4)
-  .map((t) => t.replace(/-/g, ' '));
+const { minutes, brew } = readingTime(post);
+const { level, subjects: allSubjects } = splitTags(tags);
+const subjects = allSubjects.slice(0, 4).map((t) => t.replace(/-/g, ' '));
 
 const day = pubDate.toLocaleDateString('en-US', { day: 'numeric' });
 const monthYear = pubDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });

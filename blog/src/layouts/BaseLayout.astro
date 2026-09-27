@@ -85,7 +85,11 @@ const imageURL = new URL(ogImage, Astro.site);
     />
     <script type="module">
       import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-      mermaid.initialize({ startOnLoad: true, theme: 'light' });
+      mermaid.initialize({
+        startOnLoad: true,
+        // match the site theme set by the inline script above
+        theme: document.documentElement.dataset.theme === 'light' ? 'neutral' : 'dark',
+      });
     </script>
   </head>
   <body>

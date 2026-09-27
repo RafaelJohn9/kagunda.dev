@@ -31,6 +31,21 @@ function remarkMermaid() {
   };
 }
 
+// Posts open with a hand-written "Table of Contents" blockquote. The article page
+// builds its own contents from the headings, so drop that blockquote (and the
+// horizontal rule that usually follows it) at build time.
+function remarkStripManualToc() {
+  const text = (node) => (node.value ?? '') + (node.children ?? []).map(text).join('');
+  return (tree) => {
+    const i = tree.children.findIndex(
+      (node) => node.type === 'blockquote' && /^\s*table of contents?\b/i.test(text(node)),
+    );
+    if (i === -1) return;
+    const removeRule = tree.children[i + 1]?.type === 'thematicBreak';
+    tree.children.splice(i, removeRule ? 2 : 1);
+  };
+}
+
 // https://astro.build/config
 export default defineConfig({
   site: 'https://kagunda.dev',
@@ -53,7 +68,7 @@ export default defineConfig({
     // Enable GitHub-flavored markdown
     gfm: true,
     // Enable Mermaid diagrams in markdown
-    remarkPlugins: [remarkMermaid],
+    remarkPlugins: [remarkMermaid, remarkStripManualToc],
   },
   // Vite configuration for better development experience
   vite: {
