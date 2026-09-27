@@ -12,6 +12,35 @@ const posts = (await getCollection('blog', ({ data }) => !data.draft && !!data.c
 );
 const latest = posts[0];
 
+// Things I've built, described the way their READMEs describe them
+const PROJECTS = [
+  {
+    name: 'mpesakit',
+    href: 'https://github.com/Byte-Barn/mpesakit',
+    lang: 'Python',
+    blurb: "M-Pesa integration shouldn't require a PhD in frustration. A Daraja API SDK that handles the token rotation and credential encryption, sync or async. Add your credentials, call a method, move on.",
+    cmd: 'pip install mpesakit',
+  },
+  {
+    name: 'gitcraft',
+    href: 'https://github.com/Byte-Barn/gitcraft',
+    lang: 'Rust',
+    blurb: "Formerly gh-templates. Licenses, .gitignores, issue and PR templates in one command, because clicking through GitHub's UI for every new repo is pain.",
+  },
+  {
+    name: 'CrustyTorrent',
+    href: 'https://github.com/RafaelJohn9/CrustyTorrent',
+    lang: 'Rust',
+    blurb: 'My own BitTorrent client in Rust. Now make yours.',
+  },
+  {
+    name: 'VexDB',
+    href: 'https://github.com/RafaelJohn9/VexDB',
+    lang: 'Database',
+    blurb: 'A vector database, implemented from scratch.',
+  },
+];
+
 const CONTACTS = [
   { label: 'Email', value: 'john@kagunda.dev', href: 'mailto:john@kagunda.dev' },
   { label: 'GitHub', value: 'rafaeljohn9', href: 'https://github.com/rafaeljohn9' },
@@ -22,7 +51,7 @@ const CONTACTS = [
 
 <BaseLayout
   title="About"
-  description="John Kagunda is a software engineer in Kenya writing about how systems actually work."
+  description="John Kagunda builds developer tools and offline-first software in Kenya, and writes about how things actually work."
 >
   <Header />
 
@@ -31,7 +60,7 @@ const CONTACTS = [
       <div class="container">
         <p class="ex-libris">Ex libris</p>
         <h1>John Kagunda</h1>
-        <p class="tagline">Software engineer in Kenya, thinking out loud one chapter at a time.</p>
+        <p class="tagline">Quiet by default. Responsive when it counts.</p>
       </div>
     </section>
 
@@ -39,26 +68,54 @@ const CONTACTS = [
       <div class="container narrow">
         <div class="prose">
           <p>
-            I build software for the places it actually has to run. Lately that means desktop
-            point-of-sale systems for Kenyan shops, built with Tauri and Rust to keep selling through
-            power cuts and patchy networks, and growing from a single till to many branches.
+            I'm John, <a href="https://github.com/RafaelJohn9">RafaelJohn9</a> on GitHub. I build the
+            tools I wish already existed, usually right after something took far more pain than it
+            should have. M-Pesa integrations. Setting up the same repo for the tenth time. A till that
+            stops selling because the internet blinked. If I've fought it twice, I'd rather automate it
+            once.
           </p>
           <p>
-            I'm curious about what sits underneath the tools we use every day, so a lot of what I write
-            takes something familiar apart: what Git is really storing, how SQLite lays out its pages,
-            how a GPT fits in a couple of hundred lines. Alongside that are notes on software
-            architecture and on the books that change how I work.
+            I also can't leave a black box alone. That's how I ended up writing my own BitTorrent client,
+            a vector database from scratch, and most of the Under the Hood shelf on this site. Knowing
+            what Git or SQLite is actually doing beats memorising the commands, and it's a lot less
+            stressful when something breaks. Which it will.
           </p>
           <p>
-            In 2025 my team and I won first place in the Business category at the JKUAT Hackathon with
-            <a href="/blog/writings/optibiz-ai">OptiBiz AI</a>, a WhatsApp assistant that takes the
-            admin work off small businesses.
+            Most of what I build is for Kenya first: shops where KPLC takes the power for the afternoon,
+            fiber that falls back to a 4G hotspot, businesses that already run on WhatsApp and M-Pesa.
+            That's the world <a href="/blog/writings/optibiz-ai">OptiBiz AI</a> was built for, and it won
+            my team the Business category at the JKUAT 2025 Hackathon.
           </p>
           <p>
-            This site is my notebook: lessons learned, mistakes made, and the occasional breakthrough.
-            Pour a cup and read along.
+            Code should be elegant, not clever. This site is where I write things down once they finally
+            click, so the next person gets there faster than I did.
           </p>
         </div>
+
+        <h2>Currently brewing</h2>
+        <ul class="projects">
+          {PROJECTS.map((p) => (
+            <li>
+              <a href={p.href}>
+                <span class="project-head">
+                  <span class="project-name">{p.name}</span>
+                  <span class="project-lang">{p.lang}</span>
+                </span>
+                <span class="project-blurb">{p.blurb}</span>
+                {p.cmd && <code class="project-cmd">$ {p.cmd}</code>}
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <h2 class="mono">~/.config</h2>
+        <pre class="dotfile" aria-label="My setup"><span class="c"># the short version</span>
+<span class="k">editor</span>:     <span class="v">vim</span>          <span class="c"># fight me</span>
+<span class="k">shell</span>:      <span class="v">bash</span>
+<span class="k">os</span>:         <span class="v">linux</span>        <span class="c"># obviously</span>
+<span class="k">languages</span>:  [<span class="v">rust</span>, <span class="v">python</span>, <span class="v">javascript</span>]
+<span class="k">motto</span>:      <span class="s">"if it's worth doing, automate it"</span>
+<span class="k">coffee</span>:     <span class="v">true</span>         <span class="c"># required dependency</span></pre>
 
         <h2>On the shelf</h2>
         <ul class="shelf">
@@ -140,24 +197,105 @@ const CONTACTS = [
     line-height: 1.85;
   }
 
-  .prose p:first-child::first-letter {
-    float: left;
-    font-family: 'Playfair Display', serif;
-    font-size: 3.6em;
-    line-height: 0.85;
-    margin: 0.05em 0.08em 0 0;
-    color: var(--accent-color);
-  }
-
   .prose a {
     color: var(--heading-color);
     text-underline-offset: 3px;
   }
 
+  .projects {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+    gap: 14px;
+  }
+
+  .projects a {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    height: 100%;
+    padding: 18px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg-color);
+    color: var(--text-color);
+    text-decoration: none;
+    transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .projects a:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent-color);
+    box-shadow: var(--card-hover-shadow);
+  }
+
+  .project-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .project-name {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--heading-color);
+  }
+
+  .project-lang {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-color);
+  }
+
+  .project-blurb {
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+
+  .project-cmd {
+    align-self: flex-start;
+    margin-top: 2px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #302b26;
+    color: #e3d7c5;
+    font-size: 0.8rem;
+  }
+
+  /* dotfile: always the dark code surface, like the code blocks in articles */
+  .dotfile {
+    margin: 0;
+    padding: 20px 22px;
+    border-radius: 8px;
+    background: #302b26;
+    color: #e3d7c5;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+  }
+
+  .dotfile .c { color: #8a7d6b; font-style: italic; }
+  .dotfile .k { color: #d4a76a; }
+  .dotfile .v { color: #a9c8a0; }
+  .dotfile .s { color: #e0b089; }
+
+
   .about h2 {
     margin: 60px 0 22px;
     font-size: 1.6rem;
     color: var(--heading-color);
+  }
+
+  .about h2.mono {
+    font-family: 'Courier New', Courier, monospace;
   }
 
   .shelf {
