@@ -28,9 +28,17 @@ const imageURL = new URL(ogImage, Astro.site);
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
+    <!-- Apply the saved theme before first paint so pages don't flash the default
+         theme on navigation. Must stay inline and blocking. -->
+    <script is:inline>
+      try {
+        const saved = localStorage.getItem("theme");
+        if (saved === "light" || saved === "dark") document.documentElement.dataset.theme = saved;
+      } catch {}
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="author" content="John Kagunda" />
     <meta name="keywords" content="John Kagunda, developer, software engineer, web development" />
@@ -80,30 +88,25 @@ const imageURL = new URL(ogImage, Astro.site);
       mermaid.initialize({ startOnLoad: true, theme: 'light' });
     </script>
   </head>
-  <body data-theme="dark">
+  <body>
     <slot />
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         // Theme Toggler
+        // The saved theme is already applied by the inline script in <head>.
         const themeToggleButton = document.getElementById("theme-toggle");
-        const body = document.body;
-
-        const applyTheme = () => {
-          const savedTheme = localStorage.getItem("theme") || "dark";
-          body.setAttribute("data-theme", savedTheme);
-        };
+        const root = document.documentElement;
 
         if (themeToggleButton) {
           themeToggleButton.addEventListener("click", () => {
-            let currentTheme = body.getAttribute("data-theme");
-            let newTheme = currentTheme === "light" ? "dark" : "light";
-            body.setAttribute("data-theme", newTheme);
-            localStorage.setItem("theme", newTheme);
+            const newTheme = root.dataset.theme === "light" ? "dark" : "light";
+            root.dataset.theme = newTheme;
+            try {
+              localStorage.setItem("theme", newTheme);
+            } catch {}
           });
         }
-
-        applyTheme();
 
         // Mobile Menu
         const mobileMenuToggle = document.getElementById("mobile-menu-toggle");
