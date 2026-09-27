@@ -26,10 +26,11 @@ const shortDate = (date: Date) =>
     {pages.map((chapters, p) => (
       <section
         class="sheet"
-        style={`--z: ${pages.length - p}`}
+        style={`--z: ${pages.length - p}; --stack: ${p}`}
         inert={p > 0}
         aria-label={`Contents, page ${p + 1} of ${pages.length}`}
       >
+        <div class="sheet-front">
         <p class="toc-head">{p === 0 ? 'Contents' : 'Contents, continued'}</p>
         <ol class="toc">
           {chapters.map((post, i) => (
@@ -43,8 +44,14 @@ const shortDate = (date: Date) =>
             </li>
           ))}
         </ol>
+        <span class="sheet-cast" aria-hidden="true"></span>
+        </div>
+        <div class="sheet-back" aria-hidden="true"></div>
       </section>
     ))}
+
+    <!-- shadow the lifting cover casts on the page -->
+    <span class="page-cast" aria-hidden="true"></span>
 
     <div class="page-foot" style={`--i: ${PER_PAGE}`}>
       {pages.length > 1 && (
@@ -73,7 +80,9 @@ const shortDate = (date: Date) =>
       <span class="ornament" aria-hidden="true"></span>
       <p class="cover-desc">{folder.description}</p>
       <span class="hint" aria-hidden="true"></span>
+      <span class="cover-light" aria-hidden="true"></span>
     </div>
+    <span class="cover-edge" aria-hidden="true"></span>
     <div class="cover-inside" aria-hidden="true">
       <span class="bookplate">Ex libris<br /><strong>kagunda.dev</strong></span>
     </div>
@@ -85,10 +94,21 @@ const shortDate = (date: Date) =>
     --spine-w: 18px;
     --gold: #e6c38a;
     --cream: #f3e6cc;
+    /* cover motion: a slow lift, a swing that overshoots and settles; closing
+       falls shut and bounces lightly off the pages */
+    --open-ease: cubic-bezier(0.34, 1.3, 0.5, 1);
+    --close-ease: cubic-bezier(0.55, 0, 0.8, 0.4);
     position: relative;
     height: 380px;
     perspective: 2600px;
     transition: transform 0.4s ease;
+  }
+
+  @supports (transition-timing-function: linear(0, 1)) {
+    .book {
+      --open-ease: linear(0.000, 0.002, 0.007, 0.016, 0.028, 0.067, 0.203, 0.337, 0.465, 0.584, 0.690, 0.782, 0.861, 0.926, 0.979, 1.019, 1.049, 1.070, 1.083, 1.089, 1.091, 1.088, 1.083, 1.075, 1.067, 1.058, 1.048, 1.039, 1.031, 1.024, 1.017, 1.011, 1.007, 1.003, 1.000, 0.997, 0.996, 0.995, 0.994, 0.994, 0.994, 0.994, 0.995, 0.995, 0.996, 0.996, 0.997, 0.998, 0.998);
+      --close-ease: linear(0.000, 0.000, 0.001, 0.003, 0.007, 0.011, 0.016, 0.022, 0.030, 0.039, 0.049, 0.061, 0.073, 0.087, 0.103, 0.120, 0.138, 0.158, 0.179, 0.201, 0.225, 0.251, 0.278, 0.307, 0.337, 0.368, 0.402, 0.436, 0.473, 0.511, 0.550, 0.591, 0.634, 0.679, 0.725, 0.772, 0.822, 0.873, 0.926, 0.980, 0.988, 0.972, 0.959, 0.952, 0.950, 0.956, 0.967, 0.982, 1.000);
+    }
   }
 
   .book.is-open {
@@ -126,19 +146,107 @@ const shortDate = (date: Date) =>
     inset: 6px 6px 6px var(--spine-w);
     perspective: 1400px;
     z-index: 1;
+    /* drop under the cover at once when closing */
+    transition: z-index 0s;
   }
 
-  /* Each sheet is a page that turns on the spine */
+  /* Each sheet is a page that turns on the spine: a front, a blank back, and
+     two shading layers the page-turn animation plays with */
   .sheet {
     position: absolute;
     inset: 0;
-    padding: 18px 20px 58px 24px;
-    border-radius: 0 4px 4px 0;
     z-index: var(--z);
     transform-origin: left center;
+    transform-style: preserve-3d;
+  }
+
+  /* turned pages lie on the open cover, fanned a little so the stack shows */
+  .sheet.turned {
+    transform: rotateY(calc(-97deg + var(--stack) * 1.3deg));
+  }
+
+  .sheet-front,
+  .sheet-back {
+    position: absolute;
+    inset: 0;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
-    transition: transform 0.7s cubic-bezier(0.45, 0.05, 0.2, 1);
+  }
+
+  .sheet-back {
+    transform: rotateY(180deg);
+    border-radius: 4px 0 0 4px;
+    background:
+      linear-gradient(90deg, rgba(60, 35, 15, 0.16), transparent 14%),
+      /* faint lines of ink showing through from the other side */
+      repeating-linear-gradient(transparent 0 26px, rgba(92, 64, 51, 0.025) 26px 29px),
+      var(--card-bg-color);
+    box-shadow: inset 0 0 0 1px var(--border-color);
+  }
+
+  .sheet-cast,
+  .page-cast {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  /* shadow thrown by a page turning above this one */
+  .sheet-cast {
+    background: linear-gradient(90deg, rgba(40, 22, 10, 0.5), rgba(40, 22, 10, 0.14) 45%, transparent 80%);
+  }
+
+  /* shadow thrown by the cover: heavy while it's shut, gone once it's open */
+  .page-cast {
+    z-index: 45;
+    opacity: 1;
+    background: linear-gradient(90deg, rgba(30, 15, 5, 0.55), rgba(30, 15, 5, 0.3) 55%, rgba(30, 15, 5, 0.15));
+    transition: opacity 0.3s ease-in;
+  }
+
+  /* The flexible page used while a sheet turns: a chain of thin strips, each
+     hinged to the last, so small angles add up to a curve. Built in JS, so
+     these selectors are global. */
+  .book-page :global(.flex-page) {
+    position: absolute;
+    inset: 0;
+    z-index: 150;
+    pointer-events: none;
+    transform-style: preserve-3d;
+  }
+
+  .book-page :global(.flex-strip) {
+    position: absolute;
+    top: 0;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+  }
+
+  .book-page :global(.flex-face) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: calc(100% + 1px); /* a hair of overlap hides the seams */
+    overflow: hidden;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .book-page :global(.flex-back) {
+    transform: rotateY(180deg);
+  }
+
+  .book-page :global(.flex-shade) {
+    position: absolute;
+    inset: 0;
+  }
+
+  .sheet-front {
+    padding: 18px 20px 58px 24px;
+    border-radius: 0 4px 4px 0;
     background:
       /* coffee ring left by a mug */
       radial-gradient(circle at 86% 90%,
@@ -151,10 +259,6 @@ const shortDate = (date: Date) =>
       linear-gradient(90deg, rgba(60, 35, 15, 0.16), transparent 14%),
       var(--card-bg-color);
     box-shadow: inset 0 0 0 1px var(--border-color);
-  }
-
-  .sheet.turned {
-    transform: rotateY(-180deg);
   }
 
   .toc-head {
@@ -325,8 +429,31 @@ const shortDate = (date: Date) =>
     inset: 0 0 0 var(--spine-w);
     transform-origin: left center;
     transform-style: preserve-3d;
-    transition: transform 0.9s cubic-bezier(0.3, 0.7, 0.2, 1);
+    transition: transform 0.75s var(--close-ease);
     z-index: 2;
+  }
+
+  /* the cover has a board edge you can see while it swings */
+  .cover-edge {
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    left: 100%;
+    width: 4px;
+    transform-origin: left center;
+    transform: rotateY(90deg);
+    background: linear-gradient(color-mix(in srgb, var(--leather), #000 20%), color-mix(in srgb, var(--leather), #000 45%));
+  }
+
+  /* the front darkens as it turns away from the light */
+  .cover-light {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.5));
+    opacity: 0;
+    transition: opacity 0.7s ease-out;
   }
 
   .cover-front,
@@ -456,7 +583,7 @@ const shortDate = (date: Date) =>
 
   /* Inside of the cover: coffee-marbled endpaper with a bookplate */
   .cover-inside {
-    transform: rotateY(180deg);
+    transform: rotateY(180deg) translateZ(4px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -484,6 +611,24 @@ const shortDate = (date: Date) =>
   .book.is-open .book-cover {
     transform: rotateY(-100deg);
     pointer-events: none;
+    transition: transform 1.05s var(--open-ease);
+  }
+
+  .book.is-open .cover-light {
+    opacity: 1;
+    transition: opacity 0.55s ease-in;
+  }
+
+  .book.is-open .page-cast {
+    opacity: 0;
+    transition: opacity 0.9s ease-out 0.12s;
+  }
+
+  /* once the cover is past upright, lift the pages above it so turned pages
+     can rest on the inside of the cover */
+  .book.is-open .book-page {
+    z-index: 3;
+    transition: z-index 0s linear 0.45s;
   }
 
   .book.is-open :is(.toc li, .page-foot) {
@@ -497,6 +642,22 @@ const shortDate = (date: Date) =>
     .book:is(:hover, :focus-within) .book-cover {
       transform: rotateY(-100deg);
       pointer-events: none;
+      transition: transform 1.05s var(--open-ease);
+    }
+
+    .book:is(:hover, :focus-within) .cover-light {
+      opacity: 1;
+      transition: opacity 0.55s ease-in;
+    }
+
+    .book:is(:hover, :focus-within) .page-cast {
+      opacity: 0;
+      transition: opacity 0.9s ease-out 0.12s;
+    }
+
+    .book:is(:hover, :focus-within) .book-page {
+      z-index: 3;
+      transition: z-index 0s linear 0.45s;
     }
 
     .book:is(:hover, :focus-within) :is(.toc li, .page-foot) {
@@ -509,7 +670,9 @@ const shortDate = (date: Date) =>
 
   @media (prefers-reduced-motion: reduce) {
     .book-cover,
-    .sheet,
+    .book-page,
+    .cover-light,
+    .page-cast,
     .toc li,
     .page-foot {
       transition-duration: 0s !important;
@@ -522,6 +685,121 @@ const shortDate = (date: Date) =>
   const books = [...document.querySelectorAll<HTMLElement>('.book')];
   const resets = new Map<HTMLElement, () => void>();
 
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const TURN_MS = 900;
+
+  // One page turn, done by a flexible stand-in: the real sheet is hidden while
+  // a copy of it, cut into hinged strips, curls over. The outer edge leads as
+  // the page lifts, then trails as it flops over, and lands flat.
+  const STRIPS = 10;
+  const BEND = 42; // degrees of curl at the outer edge, at its strongest
+  const easeInOut = (t: number) => 0.5 - Math.cos(Math.PI * t) / 2;
+  // < 0: edge leads (the corner lifts first), > 0: edge trails (the page
+  // flops over), 0 at both ends so it starts and lands flat
+  const curl = (t: number) =>
+    t < 0.3 ? -0.9 * Math.sin((Math.PI * t) / 0.3) : Math.sin((Math.PI * (t - 0.3)) / 0.7);
+
+  const flexTurn = (
+    book: HTMLElement,
+    sheet: HTMLElement,
+    stack: number,
+    forward: boolean,
+    ms: number,
+    delay: number,
+  ) =>
+    new Promise<void>((done) => {
+      const pageEl = book.querySelector<HTMLElement>('.book-page');
+      const front = sheet.querySelector<HTMLElement>('.sheet-front');
+      const back = sheet.querySelector<HTMLElement>('.sheet-back');
+      if (reduceMotion || document.hidden || !pageEl || !front || !back) return done();
+
+      const W = sheet.offsetWidth;
+      const H = sheet.offsetHeight;
+      const sw = W / STRIPS;
+      const root = document.createElement('div');
+      root.className = 'flex-page';
+      root.setAttribute('aria-hidden', 'true');
+      root.inert = true;
+
+      const strips: HTMLElement[] = [];
+      const shades: [HTMLElement, HTMLElement][] = [];
+      let parent: HTMLElement = root;
+      for (let k = 0; k < STRIPS; k++) {
+        const strip = document.createElement('div');
+        strip.className = 'flex-strip';
+        strip.style.cssText = `width:${sw}px;height:${H}px;left:${k === 0 ? 0 : sw}px`;
+
+        // this strip's slice of the page front, and the mirrored slice of its back
+        const face = document.createElement('div');
+        face.className = 'flex-face';
+        const frontCopy = front.cloneNode(true) as HTMLElement;
+        frontCopy.style.cssText = `inset:auto;top:0;left:${-k * sw}px;width:${W}px;height:${H}px`;
+        const faceShade = document.createElement('div');
+        faceShade.className = 'flex-shade';
+        face.append(frontCopy, faceShade);
+
+        const rear = document.createElement('div');
+        rear.className = 'flex-face flex-back';
+        const backCopy = back.cloneNode(true) as HTMLElement;
+        backCopy.style.cssText = `inset:auto;top:0;left:${-(STRIPS - 1 - k) * sw}px;width:${W}px;height:${H}px;transform:none`;
+        const rearShade = document.createElement('div');
+        rearShade.className = 'flex-shade';
+        rear.append(backCopy, rearShade);
+
+        strip.append(face, rear);
+        parent.appendChild(strip);
+        parent = strip;
+        strips.push(strip);
+        shades.push([faceShade, rearShade]);
+      }
+
+      const rest = -97 + stack * 1.3;
+      const pose = (q: number) => {
+        const base = rest * (forward ? easeInOut(q) : 1 - easeInOut(q));
+        // curl opposes the direction of travel when trailing, so flip it going back
+        const bend = BEND * curl(q) * (forward ? 1 : -1);
+        // strip 0 hinges on the spine; each later strip adds a little more curl
+        const own = strips.map((_, k) => (k === 0 ? base : (bend * 2 * k) / (STRIPS * (STRIPS - 1))));
+        const facing: number[] = [];
+        own.reduce((sum, a, k) => (facing[k] = sum + a), 0);
+        const dark = (deg: number) => Math.abs(Math.sin((deg * Math.PI) / 180));
+        strips.forEach((strip, k) => {
+          strip.style.transform = `rotateY(${own[k]}deg)`;
+          // shade each strip from its neighbours' angles so the light rolls
+          // smoothly along the curve instead of stepping strip by strip
+          const a0 = dark((facing[Math.max(0, k - 1)] + facing[k]) / 2);
+          const a1 = dark((facing[k] + facing[Math.min(STRIPS - 1, k + 1)]) / 2);
+          const tint = (a: number, f: number) => `rgba(40, 22, 10, ${(a * f).toFixed(3)})`;
+          shades[k][0].style.background = `linear-gradient(90deg, ${tint(a0, 0.5)}, ${tint(a1, 0.5)})`;
+          shades[k][1].style.background = `linear-gradient(270deg, ${tint(a0, 0.3)}, ${tint(a1, 0.3)})`;
+        });
+      };
+
+      pose(0);
+      pageEl.appendChild(root);
+      sheet.style.visibility = 'hidden';
+      const start = performance.now() + delay;
+      const frame = (now: number) => {
+        const q = Math.min(1, Math.max(0, (now - start) / ms));
+        pose(q);
+        if (q < 1) requestAnimationFrame(frame);
+        else {
+          sheet.style.visibility = '';
+          root.remove();
+          done();
+        }
+      };
+      requestAnimationFrame(frame);
+    });
+
+  const castShadow = (sheet: HTMLElement | undefined, from: number, to: number, ms: number, delay: number) =>
+    sheet?.querySelector('.sheet-cast')?.animate([{ opacity: from }, { opacity: to }], {
+      duration: ms,
+      delay,
+      easing: 'ease-out',
+      fill: 'backwards',
+    });
+
   // Page flipping: buttons everywhere, swipe on touch screens
   books.forEach((book) => {
     const sheets = [...book.querySelectorAll<HTMLElement>('.sheet')];
@@ -530,19 +808,43 @@ const shortDate = (date: Date) =>
     const cur = book.querySelector('.page-num .cur');
     let page = 0;
 
-    const go = (n: number) => {
+    const go = (n: number, ms = TURN_MS) => {
       n = Math.max(0, Math.min(sheets.length - 1, n));
       if (n === page) return;
+      const forward = n > page;
+      // the sheets that actually turn, in the order they turn
+      const turning = forward ? sheets.slice(page, n) : sheets.slice(n, page).reverse();
+      const from = page;
       page = n;
+
       sheets.forEach((sheet, i) => {
         sheet.classList.toggle('turned', i < page);
         sheet.inert = i !== page;
       });
+
+      if (!reduceMotion) {
+        turning.forEach((sheet, k) => {
+          const i = sheets.indexOf(sheet);
+          const delay = k * 110; // several pages at once fan out one after another
+          // a page coming back must pass over the current one; a page going
+          // forward must end up on top of the pages already turned
+          if (!forward) sheet.style.zIndex = String(200 + i);
+          flexTurn(book, sheet, i, forward, ms, delay).then(() => {
+            sheet.style.zIndex = forward ? String(100 + i) : '';
+          });
+        });
+        if (forward) castShadow(sheets[n], 0.5, 0, ms * 0.8, (turning.length - 1) * 110);
+        else castShadow(sheets[from], 0, 0.5, ms, 0);
+      } else {
+        sheets.forEach((sheet, i) => (sheet.style.zIndex = i < page ? String(100 + i) : ''));
+      }
+
       if (prev) prev.disabled = page === 0;
       if (next) next.disabled = page === sheets.length - 1;
       if (cur) cur.textContent = String(page + 1);
     };
-    resets.set(book, () => go(0));
+    // closing the book brings any turned pages back with the cover
+    resets.set(book, () => go(0, 550));
 
     prev?.addEventListener('click', () => go(page - 1));
     next?.addEventListener('click', () => go(page + 1));
@@ -562,11 +864,11 @@ const shortDate = (date: Date) =>
       });
     }
 
-    // With a mouse, return to the first page once the book has closed
+    // With a mouse, the pages close with the cover when the pointer leaves
     let leaveTimer: number | undefined;
     book.addEventListener('mouseleave', () => {
       if (book.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
-      leaveTimer = window.setTimeout(() => go(0), 900);
+      leaveTimer = window.setTimeout(() => go(0, 550), 150);
     });
     book.addEventListener('mouseenter', () => clearTimeout(leaveTimer));
   });
@@ -575,7 +877,7 @@ const shortDate = (date: Date) =>
     books.forEach((b) => {
       if (b !== except && b.classList.contains('is-open')) {
         b.classList.remove('is-open');
-        window.setTimeout(() => resets.get(b)?.(), 600);
+        resets.get(b)?.();
       }
     });
   };
