@@ -3,6 +3,7 @@ title: "Chaos Algorithms in the Wild: Three True Stories Behind the Math"
 description: "Part 2 of the chaos algorithms series; the real people and real moments where 'controlled chaos' quietly changed science, space travel, and computing."
 pubDate: 2026-07-07
 tags: ["algorithms", "chaos-theory", "storytelling", "optimization", "space", "history-of-science"]
+series: "algorithms"
 category: "tutorials"
 featured: true
 draft: false

@@ -3,6 +3,7 @@ title: "Andrej Karpathy's 200-line GPT implementation"
 description: "Turns out intelligence at its core is simpler than you'd expect."
 pubDate: 2026-03-30
 tags: ["gpt", "machine-learning", "transformers", "python", "beginner"]
+series: "under-the-hood"
 category: "tutorials"
 featured: true
 draft: false

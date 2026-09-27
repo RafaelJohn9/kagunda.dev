@@ -3,6 +3,7 @@ title: "Chaos Algorithms Made Simple: Finding Order in Apparent Randomness"
 description: "A Beginner’s Guide to Chaos Algorithms: Does the End Justify the Means?"
 pubDate: 2025-12-24
 tags: ["algorithms", "chaos-theory", "beginner", "optimization", "problem-solving"]
+series: "algorithms"
 category: "tutorials"
 featured: true
 draft: false

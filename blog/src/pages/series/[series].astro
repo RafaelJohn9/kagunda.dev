@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import Footer from '../../components/Footer.astro';
+import { getFolders, type Folder } from '../../folders';
+
+export async function getStaticPaths() {
+  const folders = await getFolders();
+  return folders.map((folder) => ({ params: { series: folder.id }, props: { folder } }));
+}
+
+const { folder } = Astro.props as { folder: Folder };
+---
+
+<BaseLayout title={folder.title} description={folder.description}>
+  <Header />
+
+  <main>
+    <section class="page-header">
+      <div class="container">
+        <a class="back" href="/#folders">← Back to the shelf</a>
+        <p class="count">{folder.posts.length} {folder.posts.length === 1 ? 'chapter' : 'chapters'}</p>
+        <h1>{folder.title}</h1>
+        <p class="description">{folder.description}</p>
+      </div>
+    </section>
+
+    <section class="posts">
+      <div class="container">
+        <div class="articles-list">
+          {folder.posts.map((post, i) => (
+            <ArticleCard post={post} numbered />
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
+
+<style>
+  .page-header {
+    padding: 70px 0 30px;
+    text-align: center;
+  }
+
+  .back {
+    display: inline-block;
+    margin-bottom: 30px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: var(--text-color);
+    opacity: 0.75;
+  }
+
+  .back:hover {
+    opacity: 1;
+    color: var(--accent-color);
+  }
+
+  .count {
+    margin: 0 0 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-color);
+  }
+
+  .page-header h1 {
+    font-size: 3rem;
+    color: var(--heading-color);
+    margin-bottom: 16px;
+  }
+
+  .description {
+    max-width: 600px;
+    margin: 0 auto;
+    font-style: italic;
+  }
+
+  .posts {
+    padding-top: 20px;
+  }
+
+  .articles-list {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 768px) {
+    .page-header h1 {
+      font-size: 2.2rem;
+    }
+  }
+</style>

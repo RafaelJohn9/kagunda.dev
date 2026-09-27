@@ -3,6 +3,7 @@ title: "What SQLite Is Actually Doing"
 description: "It's one file, a pile of 4 KB pages, and a few B-trees. Open it up and see how SQLite stores, finds, and safely writes your data."
 pubDate: 2026-09-20
 tags: ["sqlite", "databases", "internals", "b-tree", "storage", "intermediate"]
+series: "under-the-hood"
 category: "writings"
 featured: false
 draft: false
