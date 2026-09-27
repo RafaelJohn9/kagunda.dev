@@ -3,6 +3,7 @@ title: "The Art of High-Quality Compression"
 description: "AV1 cuts video file sizes by ~50% with no visible quality loss."
 pubDate: 2026-01-11
 tags: ["video", "av1", "h264", "web-performance", "ffmpeg", "media", "optimization"]
+series: "under-the-hood"
 category: "tutorials"
 featured: true
 draft: false

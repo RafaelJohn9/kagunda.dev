@@ -1,5 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
+import { SERIES_IDS } from './series';
 
 const blog = defineCollection({
   loader: glob({ 
@@ -19,6 +20,8 @@ const blog = defineCollection({
       heroImage: image().optional(),
       category: z.enum(['library', 'writings', 'tutorials']).optional(),
       tags: z.array(z.string()).optional(),
+      // Folder this post belongs to; see src/series.ts.
+      series: z.enum(SERIES_IDS).optional(),
       draft: z.boolean().optional(),
       featured: z.boolean().optional(),
     }),

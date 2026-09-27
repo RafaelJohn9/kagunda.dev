@@ -3,6 +3,7 @@ import { getCollection, getEntry, render } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
+import { getFolder } from "../../folders";
 
 // 1. Export getStaticPaths to define all static blog post URLs
 export async function getStaticPaths() {
@@ -33,6 +34,12 @@ const formattedDate = entry.data.pubDate.toLocaleDateString("en-US", {
   month: "long",
   day: "numeric",
 });
+
+// Where this post sits in its folder, if it has one
+const folder = entry.data.series ? await getFolder(entry.data.series) : undefined;
+const position = folder ? folder.posts.findIndex((p) => p.id === entry.id) : -1;
+const prevPost = folder && position > 0 ? folder.posts[position - 1] : undefined;
+const nextPost = folder && position >= 0 ? folder.posts[position + 1] : undefined;
 ---
 
 <BaseLayout
@@ -58,6 +65,12 @@ const formattedDate = entry.data.pubDate.toLocaleDateString("en-US", {
               {formattedDate}
             </time>
           </div>
+          {folder && position >= 0 && (
+            <a class="series-badge" href={`/series/${folder.id}`}>
+              Chapter <span class="series-idx">#{position + 1}</span>
+              of {folder.posts.length} · <strong>{folder.title}</strong>
+            </a>
+          )}
           <h1>{entry.data.title}</h1>
           <p class="post-description">{entry.data.description}</p>
           <div class="post-tags">
@@ -68,6 +81,23 @@ const formattedDate = entry.data.pubDate.toLocaleDateString("en-US", {
         <div class="post-content">
           <Content />
         </div>
+
+        {folder && (prevPost || nextPost) && (
+          <nav class="series-nav" aria-label={`More in ${folder.title}`}>
+            {prevPost ? (
+              <a class="prev" href={`/blog/${prevPost.id}`}>
+                <span class="label">← #{position} · Previous</span>
+                <span class="title">{prevPost.data.title}</span>
+              </a>
+            ) : <span />}
+            {nextPost && (
+              <a class="next" href={`/blog/${nextPost.id}`}>
+                <span class="label">Next · #{position + 2} →</span>
+                <span class="title">{nextPost.data.title}</span>
+              </a>
+            )}
+          </nav>
+        )}
       </div>
     </article>
   </main>
@@ -217,6 +247,86 @@ const formattedDate = entry.data.pubDate.toLocaleDateString("en-US", {
     font-size: 3rem;
     margin-bottom: 20px;
     line-height: 1.2;
+  }
+
+  .series-badge {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 18px;
+    padding: 4px 14px;
+    border-radius: 15px;
+    border: 1px solid color-mix(in srgb, var(--accent-color) 50%, transparent);
+    background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+    color: var(--text-color);
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+  }
+
+  .series-badge:hover {
+    background: color-mix(in srgb, var(--accent-color) 22%, transparent);
+  }
+
+  .series-idx {
+    font-weight: 700;
+    color: var(--accent-color);
+  }
+
+  .series-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 60px;
+    padding-top: 30px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .series-nav a {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg-color);
+    text-decoration: none;
+    color: var(--text-color);
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+
+  .series-nav a:hover {
+    border-color: var(--accent-color);
+    transform: translateY(-2px);
+  }
+
+  .series-nav .next {
+    text-align: right;
+    grid-column: 2;
+  }
+
+  .series-nav .label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent-color);
+  }
+
+  .series-nav .title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--heading-color);
+    line-height: 1.35;
+  }
+
+  @media (max-width: 600px) {
+    .series-nav {
+      grid-template-columns: 1fr;
+    }
+    .series-nav .next {
+      grid-column: 1;
+    }
   }
 
   .post-description {

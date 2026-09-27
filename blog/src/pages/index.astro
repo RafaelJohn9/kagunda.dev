@@ -4,6 +4,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Hero from '../components/Hero.astro';
 import ArticleCard from '../components/ArticleCard.astro';
+import BookCard from '../components/BookCard.astro';
+import { getFolders } from '../folders';
 import Footer from '../components/Footer.astro';
 
 // Get all blog posts and sort by date
@@ -17,18 +19,10 @@ const sortedPosts = allBlogPosts.sort((a, b) =>
 );
 
 
-// Separate posts by category, prioritizing featured posts and then taking the latest
-const getTopPosts = (category) => {
-  const categoryPosts = sortedPosts.filter(post => post.data.category === category);
-  const featuredPosts = categoryPosts.filter(post => post.data.featured);
-  const nonFeaturedPosts = categoryPosts.filter(post => !post.data.featured);
+const folders = await getFolders();
 
-  return [...featuredPosts, ...nonFeaturedPosts];
-};
-
-const libraryPosts = getTopPosts('library');
-const writingsPosts = getTopPosts('writings');
-const tutorialsPosts = getTopPosts('tutorials');
+// Posts that don't belong to a folder yet
+const loosePosts = sortedPosts.filter((post) => post.data.category && !post.data.series);
 
 // Get unique tags for popular topics
 const allTags = [...new Set(allBlogPosts.flatMap(post => post.data.tags))];
@@ -43,31 +37,21 @@ const allTags = [...new Set(allBlogPosts.flatMap(post => post.data.tags))];
     <section id="latest-articles">
       <div class="container">
         <h2>From My Desk</h2>
-        
-        {
-          (() => {
-            const articles = [...tutorialsPosts, ...writingsPosts, ...libraryPosts].sort(
-              (a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime()
-            );
-            return (
-              articles.length > 0 && (
-                <div class="category-section">
-                  <h3 class="category-title">Articles</h3>
-                  <div class="articles-grid" style="display:flex; flex-direction:column; gap:1rem;">
-                    {articles.map((post) => (
-                      <ArticleCard
-                        title={post.data.title}
-                        excerpt={post.data.description}
-                        tags={post.data.tags}
-                        slug={post.data.slug ? post.data.slug : post.id}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )
-            );
-          })()
-        }
+
+        <div id="folders" class="folders-grid">
+          {folders.map((folder, i) => <BookCard folder={folder} volume={i + 1} />)}
+        </div>
+
+        {loosePosts.length > 0 && (
+          <div class="category-section loose">
+            <h3 class="category-title">Loose Pages</h3>
+            <div class="articles-grid">
+              {loosePosts.map((post) => (
+                <ArticleCard post={post} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
 
@@ -130,6 +114,19 @@ const allTags = [...new Set(allBlogPosts.flatMap(post => post.data.tags))];
     bottom: -15px;
     left: 50%;
     transform: translateX(-50%);
+  }
+
+  /* an opening book cover swings past its card; don't let it scroll the page sideways */
+  #latest-articles {
+    overflow-x: clip;
+  }
+
+  .folders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+    gap: 44px 40px;
+    margin-bottom: 80px;
+    scroll-margin-top: 40px;
   }
 
   .category-section {
@@ -197,8 +194,11 @@ const allTags = [...new Set(allBlogPosts.flatMap(post => post.data.tags))];
 
   .articles-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 30px;
+    grid-template-columns: 1fr;
+    gap: 0;
+    max-width: 820px;
+    margin-left: auto;
+    margin-right: auto;
     margin-top: 40px;
   }
 

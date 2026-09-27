@@ -3,6 +3,7 @@ title: "Mastering Dynamic Programming: A Comprehensive Guide"
 description: "Learn how to solve dynamic programming problems effectively, utilizing various techniques and strategies to optimize your solutions."
 pubDate: 2025-12-24
 tags: ["algorithms", "dynamic-programming", "python", "optimization", "leetcode"]
+series: "algorithms"
 category: "tutorials"
 featured: true
 draft: false

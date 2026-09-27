@@ -3,6 +3,7 @@ title: "What Git Is Actually Doing"
 description: "You probably haven't bothered to understand git. You should. Probably."
 pubDate: 2026-06-15
 tags: ["git", "internals", "version-control", "tools", "intermediate"]
+series: "under-the-hood"
 category: "writings"
 featured: true
 draft: false
