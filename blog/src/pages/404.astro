@@ -1,98 +1,124 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { getFolders } from '../folders';
+
+const folders = await getFolders();
+const posts = await getCollection('blog', ({ data }) => !data.draft && !!data.category);
+const chapterUrls = posts.map((post) => `/blog/${post.id}`);
+
+// Each volume becomes a book on the shelf: fatter for more chapters, heights varied
+const HEIGHTS = [206, 228, 194, 218, 200];
+const books = folders.map((folder, i) => ({
+  href: `/series/${folder.id}`,
+  title: folder.title,
+  color: folder.color,
+  vol: String(i + 1).padStart(2, '0'),
+  height: HEIGHTS[i % HEIGHTS.length],
+  thickness: 34 + Math.min(folder.posts.length, 5) * 4,
+}));
+// The missing page leaves a gap in the middle of the shelf
+const gapAt = Math.ceil(books.length / 2);
+
+// A ceramic mug approximated by a ring of thin faces, shaded against a light from the upper left
+const MUG_R = 30;
+const MUG_SIDES = 28;
+const faceWidth = 2 * MUG_R * Math.tan(Math.PI / MUG_SIDES) + 1.2;
+const mugFaces = Array.from({ length: MUG_SIDES }, (_, i) => {
+  const angle = (i * 360) / MUG_SIDES;
+  const light = Math.cos(((angle + 40) * Math.PI) / 180); // -1..1
+  return { angle, lightness: 80 + light * 10 };
+});
 ---
 
-<BaseLayout title="Page Not Found" description="The page you're looking for seems to have wandered off into the digital wilderness.">
+<BaseLayout title="Page not found" description="This chapter isn't on the shelf.">
   <Header />
-  
-  <main class="not-found-main">
-    <section class="not-found-section">
-      <div class="container">
-        <div class="not-found-content">
-          <!-- Animated Coffee Cup -->
-          <div class="coffee-animation">
-            <div class="coffee-cup">
-              <div class="coffee-handle"></div>
-              <div class="coffee-liquid">
-                <div class="coffee-steam">
-                  <span class="steam steam-1"></span>
-                  <span class="steam steam-2"></span>
-                  <span class="steam steam-3"></span>
-                </div>
-              </div>
-            </div>
-            <div class="coffee-spill"></div>
-          </div>
 
-          <!-- 404 Content -->
-          <div class="error-content">
-            <div class="error-code">
-              <span class="digit digit-1">4</span>
-              <span class="digit digit-2">0</span>
-              <span class="digit digit-3">4</span>
-            </div>
-            
-            <h1 class="error-title">Page Not Found in My Library</h1>
-            
-            <p class="error-description">
-                Oops! The page you're looking for seems to have taken an unscheduled coffee break or is busy reorganizing my digital library. 
-                Don't worry, it's probably just lost in the stacks of creativity!
-            </p>
-            
-            <!-- Animated Books -->
-            <div class="floating-books">
-              <div class="book book-1">
-                <div class="book-spine"></div>
-              </div>
-              <div class="book book-2">
-                <div class="book-spine"></div>
-              </div>
-              <div class="book book-3">
-                <div class="book-spine"></div>
-              </div>
-            </div>
+  <main class="nf">
+    <section class="stage" aria-hidden="true">
+      <div class="scene" id="scene">
+        <div class="world" id="world">
+          <div class="row">
+            {books.map((book, i) => (
+              <>
+                {i === gapAt && (
+                  <div class="gap">
+                    <span class="gap-card">404</span>
+                  </div>
+                )}
+                <a
+                  class:list={['book', { leaning: i === gapAt }]}
+                  href={book.href}
+                  tabindex="-1"
+                  style={`--leather: ${book.color}; --h: ${book.height}px; --t: ${book.thickness}px`}
+                >
+                  <span class="face spine">
+                    <span class="band"></span>
+                    <span class="spine-title">{book.title}</span>
+                    <span class="spine-vol">{book.vol}</span>
+                  </span>
+                  <span class="face side left"></span>
+                  <span class="face side right"></span>
+                  <span class="face top"></span>
+                  <span class="face back"></span>
+                </a>
+              </>
+            ))}
 
-            <!-- Navigation Options -->
-            <div class="error-actions">
-                <a href="/" class="primary-button">
-                <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-                </svg>
-                Back to Home
-                </a>
-                <a href="/tutorials" class="secondary-button">
-                <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                  <path d="M12 2L3 7v13h18V7L12 2zm0 2.3l6 3.6v1.1l-6-3.6-6 3.6V7.9l6-3.6zm-6 6.7l6 3.6 6-3.6v7.4H6v-7.4z"/>
-                </svg>
-                Browse Tutorials
-                </a>
-                <a href="/writings" class="secondary-button">
-                <svg class="button-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                  <path d="M21 6h-8l-2-2H3v16h18V6zm-2 12H5V8h14v10z"/>
-                </svg>
-                Read Writings
-                </a>
-            </div>
-
-            <!-- Search suggestion -->
-            <div class="search-suggestion">
-              <p>Looking for something specific? Try searching through my:</p>
-              <div class="quick-links">
-                <a href="/library" class="quick-link">Library</a>
-                <a href="/tags" class="quick-link">Topics</a>
-                <a href="/archive" class="quick-link">Archive</a>
-              </div>
+            <div class="mug">
+              {mugFaces.map((f) => (
+                <span
+                  class="mug-face"
+                  style={`transform: rotateY(${f.angle}deg) translateZ(${MUG_R}px); width: ${faceWidth}px; margin-left: ${-faceWidth / 2}px; background: hsl(36 38% ${f.lightness}%)`}
+                ></span>
+              ))}
+              <span class="mug-rim"></span>
+              <span class="mug-coffee"></span>
+              <span class="mug-handle"></span>
+              <span class="steam s1"></span>
+              <span class="steam s2"></span>
+              <span class="steam s3"></span>
             </div>
           </div>
 
-          <!-- Animated Paper Planes -->
-          <div class="paper-planes">
-            <div class="paper-plane plane-1"></div>
-            <div class="paper-plane plane-2"></div>
+          <div class="plank">
+            <span class="plank-top"></span>
+            <span class="plank-front"></span>
+            <span class="plank-end l"></span>
+            <span class="plank-end r"></span>
           </div>
         </div>
+        <div class="floor-shadow"></div>
+      </div>
+    </section>
+
+    <section class="copy">
+      <div class="container">
+        <p class="kicker">Error 404 · Missing from the shelf</p>
+        <h1>This chapter hasn't been written</h1>
+        <p class="lede">
+          The page you're after isn't where it should be. It may have been moved or renamed, or it's
+          still a draft sitting next to a cold cup of coffee.
+        </p>
+        <p class="hint">Pull a book off the shelf above, or try one of these:</p>
+
+        <div class="actions">
+          <a class="btn primary" href="/">Back to the shelf</a>
+          <button class="btn" type="button" id="random-chapter" data-urls={JSON.stringify(chapterUrls)}>
+            Read a random chapter
+          </button>
+          <a class="btn" href="/blog">Browse the archive</a>
+        </div>
+
+        <nav class="quick" aria-label="More places to look">
+          <a href="/tutorials">Tutorials</a>
+          <a href="/writings">Writings</a>
+          <a href="/library">Library</a>
+          <a href="/tags">Topics</a>
+          <a href="/about">About</a>
+        </nav>
       </div>
     </section>
   </main>
@@ -101,646 +127,499 @@ import Footer from '../components/Footer.astro';
 </BaseLayout>
 
 <style>
-  .not-found-main {
-    min-height: calc(100vh - 140px);
+  .nf {
+    overflow-x: clip;
+  }
+
+  /* ---------- 3D stage ---------- */
+  .stage {
+    padding: 40px 0 0;
     display: flex;
-    align-items: center;
-    padding: 60px 0;
+    justify-content: center;
   }
 
-  .not-found-section {
-    width: 100%;
+  .scene {
+    --plank-w: 560px;
+    --depth: 150px;
+    --plank-d: 176px;
+    --plank-t: 20px;
     position: relative;
-    overflow: hidden;
+    width: var(--plank-w);
+    height: 300px;
+    perspective: 1100px;
+    perspective-origin: 50% 20%;
   }
 
-  .not-found-content {
-    text-align: center;
-    position: relative;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-
-  /* Coffee Cup Animation */
-  .coffee-animation {
-    position: relative;
-    margin-bottom: 40px;
-    display: inline-block;
-    z-index: 10;
-  }
-
-  .coffee-cup {
-    width: 80px;
-    height: 100px;
-    background: linear-gradient(145deg, var(--card-bg-color), var(--bg-color));
-    border: 3px solid var(--border-color);
-    border-radius: 0 0 40px 40px;
-    position: relative;
-    box-shadow: var(--card-shadow);
-    animation: gentle-bounce 3s ease-in-out infinite;
-  }
-
-  .coffee-handle {
-    width: 20px;
-    height: 30px;
-    border: 3px solid var(--border-color);
-    border-left: none;
-    border-radius: 0 15px 15px 0;
+  .world {
+    --rx: -14deg;
+    --ry: -22deg;
     position: absolute;
-    right: -23px;
-    top: 20px;
-    background: transparent;
+    inset: 0;
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx)) rotateY(var(--ry));
+    transition: transform 0.25s ease-out;
+    animation: sway 9s ease-in-out infinite;
   }
 
-  .coffee-liquid {
-    width: 70px;
-    height: 60px;
-    background: linear-gradient(45deg, var(--accent-color), var(--heading-color));
-    border-radius: 0 0 35px 35px;
-    position: absolute;
-    bottom: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-    overflow: visible;
+  .world.tracking {
+    animation: none;
   }
 
-  .coffee-liquid::before {
-    content: '';
+  @keyframes sway {
+    0%, 100% { transform: rotateX(var(--rx)) rotateY(-22deg); }
+    50% { transform: rotateX(var(--rx)) rotateY(-8deg); }
+  }
+
+  .row {
     position: absolute;
-    top: 0;
     left: 0;
     right: 0;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 50%;
-    animation: coffee-ripple 2s ease-in-out infinite;
+    bottom: calc(var(--plank-t) + 20px);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 3px;
+    transform-style: preserve-3d;
   }
 
-  .coffee-steam {
+  /* ---------- Books: a box of five faces ---------- */
+  .book {
+    position: relative;
+    width: var(--t);
+    height: var(--h);
+    flex-shrink: 0;
+    transform-style: preserve-3d;
+    transition: transform 0.45s cubic-bezier(0.3, 0.8, 0.3, 1);
+    text-decoration: none;
+  }
+
+  .book:hover {
+    transform: translateZ(46px) translateY(-6px);
+  }
+
+  .book.leaning {
+    transform-origin: 0 100%;
+    transform: rotateZ(-13deg);
+    margin-left: 2px;
+  }
+
+  .book.leaning:hover {
+    transform: rotateZ(-13deg) translateZ(46px);
+  }
+
+  .face {
     position: absolute;
-    top: -40px;
+    backface-visibility: hidden;
+  }
+
+  .spine {
+    inset: 0;
+    transform: translateZ(calc(var(--depth) / 2));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 14px 0 12px;
+    border-radius: 3px;
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.35), rgba(255, 255, 255, 0.12) 45%, rgba(0, 0, 0, 0.3)),
+      var(--leather);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  }
+
+  .band {
+    width: 100%;
+    height: 7px;
+    border-top: 1px solid #e6c38a;
+    border-bottom: 1px solid #e6c38a;
+    opacity: 0.7;
+  }
+
+  .spine-title {
+    flex: 1;
+    margin: 12px 0;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: 'Playfair Display', serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #e6c38a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.4);
+  }
+
+  .spine-vol {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: rgba(230, 195, 138, 0.8);
+  }
+
+  .side {
+    top: 0;
+    width: var(--depth);
+    height: var(--h);
+    left: calc((var(--t) - var(--depth)) / 2);
+    background:
+      linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.3)),
+      var(--leather);
+  }
+
+  .side.left {
+    transform: rotateY(-90deg) translateZ(calc(var(--t) / 2));
+  }
+
+  .side.right {
+    transform: rotateY(90deg) translateZ(calc(var(--t) / 2));
+    filter: brightness(0.7);
+  }
+
+  /* page edges, seen from above */
+  .top {
+    left: 0;
+    width: var(--t);
+    height: var(--depth);
+    top: calc((var(--h) - var(--depth)) / 2);
+    transform: rotateX(90deg) translateZ(calc(var(--h) / 2));
+    background:
+      linear-gradient(90deg, var(--leather) 0 3px, transparent 3px calc(100% - 3px), var(--leather) calc(100% - 3px)),
+      repeating-linear-gradient(90deg, #f3e6cc 0 2px, #dcc9a6 2px 3px);
+  }
+
+  .back {
+    inset: 0;
+    transform: rotateY(180deg) translateZ(calc(var(--depth) / 2));
+    background: var(--leather);
+  }
+
+  /* ---------- The gap where the missing page belongs ---------- */
+  .gap {
+    position: relative;
+    width: 96px;
+    height: 200px;
+    flex-shrink: 0;
+    transform-style: preserve-3d;
+  }
+
+  .gap-card {
+    position: absolute;
+    left: 6px;
+    width: 38px;
+    bottom: 0;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    transform: translateZ(calc(var(--depth) / -2 + 4px));
+    border: 2px dashed color-mix(in srgb, var(--accent-color) 70%, transparent);
+    border-radius: 3px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 0.05em;
+    color: var(--accent-color);
+    animation: flicker 3.5s ease-in-out infinite;
+  }
+
+  @keyframes flicker {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 0.45; }
+  }
+
+  /* ---------- Coffee mug ---------- */
+  .mug {
+    position: relative;
+    width: 60px;
+    height: 72px;
+    margin-left: 26px;
+    flex-shrink: 0;
+    transform-style: preserve-3d;
+    transform: translateZ(20px);
+  }
+
+  .mug-face {
+    position: absolute;
+    top: 0;
     left: 50%;
-    transform: translateX(-50%);
-    width: 40px;
-    height: 50px;
-    pointer-events: none;
-    z-index: 20;
+    height: 72px;
+    backface-visibility: hidden;
+  }
+
+  .mug-rim,
+  .mug-coffee {
+    position: absolute;
+    left: 50%;
+    border-radius: 50%;
+  }
+
+  .mug-rim {
+    width: 60px;
+    height: 60px;
+    margin: -30px 0 0 -30px;
+    top: 0;
+    transform: rotateX(90deg);
+    border: 3px solid #f3e6cc;
+  }
+
+  .mug-coffee {
+    width: 54px;
+    height: 54px;
+    margin: -27px 0 0 -27px;
+    top: 8px;
+    transform: rotateX(90deg);
+    background: radial-gradient(circle at 40% 40%, #8a5a3a, #4a2c1a 55%, #2e1a0e);
+    box-shadow: inset 0 0 0 3px rgba(210, 160, 110, 0.35);
+  }
+
+  .mug-handle {
+    position: absolute;
+    top: 14px;
+    right: -20px;
+    width: 26px;
+    height: 36px;
+    border: 7px solid hsl(36 38% 74%);
+    border-left: none;
+    border-radius: 0 50% 50% 0 / 0 45% 45% 0;
   }
 
   .steam {
     position: absolute;
-    width: 4px;
-    height: 30px;
-    background: linear-gradient(to top, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.1));
-    border-radius: 2px;
-    filter: blur(1px);
-    animation: steam-rise 2.5s ease-in-out infinite;
-    transform-origin: bottom center;
-  }
-
-  .steam-1 {
-    left: 12px;
-    animation-delay: 0s;
-  }
-
-  .steam-2 {
-    left: 18px;
-    animation-delay: 0.7s;
-    height: 25px;
-  }
-
-  .steam-3 {
-    left: 24px;
-    animation-delay: 1.4s;
-    height: 28px;
-  }
-
-  .coffee-spill {
-    position: absolute;
-    bottom: -10px;
+    bottom: 78px;
     left: 50%;
-    transform: translateX(-50%);
-    width: 120px;
-    height: 20px;
-    background: radial-gradient(ellipse, var(--coffee-stain-1), transparent);
+    width: 10px;
+    height: 46px;
     border-radius: 50%;
-    animation: spill-grow 4s ease-in-out infinite;
+    background: linear-gradient(to top, rgba(255, 255, 255, 0.55), transparent);
+    filter: blur(5px);
+    opacity: 0;
+    animation: steam 3.2s ease-out infinite;
   }
 
-  /* 404 Error Code */
-  .error-code {
-    font-family: 'Playfair Display', serif;
-    font-size: 8rem;
-    font-weight: 700;
-    color: var(--heading-color);
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+  .s1 { margin-left: -16px; }
+  .s2 { margin-left: -4px; animation-delay: 1s; }
+  .s3 { margin-left: 8px; animation-delay: 2.1s; }
+
+  :global([data-theme='light']) .steam {
+    background: linear-gradient(to top, rgba(120, 90, 60, 0.35), transparent);
   }
 
-  .digit {
-    display: inline-block;
-    animation: digit-float 3s ease-in-out infinite;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  @keyframes steam {
+    0% { transform: translateY(0) scaleX(1); opacity: 0; }
+    20% { opacity: 1; }
+    100% { transform: translateY(-50px) scaleX(1.8) rotate(8deg); opacity: 0; }
   }
 
-  .digit-1 {
-    animation-delay: 0s;
-  }
-
-  .digit-2 {
-    animation-delay: 0.5s;
-    transform: scale(1.1);
-  }
-
-  .digit-3 {
-    animation-delay: 1s;
-  }
-
-  .error-title {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-    color: var(--heading-color);
-    animation: fade-in-up 1s ease-out;
-  }
-
-  .error-description {
-    font-size: 1.2rem;
-    line-height: 1.8;
-    margin-bottom: 40px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
-    color: var(--text-color);
-    animation: fade-in-up 1s ease-out 0.3s both;
-  }
-
-  /* Floating Books */
-  .floating-books {
+  /* ---------- Wooden shelf plank ---------- */
+  .plank {
     position: absolute;
-    top: 50%;
-    right: -50px;
-    transform: translateY(-50%);
-  }
-
-  .book {
-    width: 30px;
-    height: 40px;
-    background: var(--card-bg-color);
-    border: 2px solid var(--border-color);
-    border-radius: 2px;
-    position: relative;
-    margin-bottom: 15px;
-    animation: book-float 4s ease-in-out infinite;
-  }
-
-  .book-spine {
-    width: 4px;
-    height: 35px;
-    background: var(--accent-color);
-    position: absolute;
-    left: 3px;
-    top: 2.5px;
-    border-radius: 1px;
-  }
-
-  .book-1 {
-    animation-delay: 0s;
-  }
-
-  .book-2 {
-    animation-delay: 1s;
-    background: var(--heading-color);
-  }
-
-  .book-2 .book-spine {
-    background: var(--text-color);
-  }
-
-  .book-3 {
-    animation-delay: 2s;
-  }
-
-  /* Action Buttons */
-  .error-actions {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
-    animation: fade-in-up 1s ease-out 0.6s both;
-  }
-
-  .primary-button {
-    background-color: var(--heading-color);
-    color: var(--bg-color);
-    padding: 15px 30px;
-    font-family: 'Lora', serif;
-    font-weight: 700;
-    text-decoration: none;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: all 0.3s ease;
-    box-shadow: var(--card-shadow);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .primary-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.6s ease;
-  }
-
-  .primary-button:hover::before {
-    left: 100%;
-  }
-
-  .primary-button:hover {
-    background-color: var(--accent-color);
-    transform: translateY(-3px);
-    box-shadow: var(--card-hover-shadow);
-  }
-
-  .secondary-button {
-    background-color: transparent;
-    color: var(--heading-color);
-    padding: 15px 25px;
-    font-family: 'Lora', serif;
-    font-weight: 600;
-    text-decoration: none;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-  }
-
-  .secondary-button:hover {
-    background-color: var(--card-bg-color);
-    border-color: var(--heading-color);
-    transform: translateY(-2px);
-  }
-
-  .button-icon {
-    font-size: 1.2rem;
-  }
-
-  /* Search Suggestions */
-  .search-suggestion {
-    margin-top: 40px;
-    animation: fade-in-up 1s ease-out 0.9s both;
-  }
-
-  .search-suggestion p {
-    color: var(--text-color);
-    margin-bottom: 15px;
-    font-style: italic;
-  }
-
-  .quick-links {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
-
-  .quick-link {
-    color: var(--accent-color);
-    text-decoration: none;
-    padding: 8px 16px;
-    border: 1px solid var(--border-color);
-    border-radius: 20px;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    background-color: var(--card-bg-color);
-  }
-
-  .quick-link:hover {
-    background-color: var(--accent-color);
-    color: var(--bg-color);
-    transform: scale(1.05);
-  }
-
-  /* Paper Planes */
-  .paper-planes {
-    position: absolute;
-    top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    overflow: hidden;
+    right: 0;
+    bottom: 20px;
+    height: var(--plank-t);
+    transform-style: preserve-3d;
   }
 
-  .paper-plane {
+  .plank > span {
     position: absolute;
-    width: 0;
-    height: 0;
-    border-left: 15px solid transparent;
-    border-right: 15px solid transparent;
-    border-bottom: 30px solid var(--border-color);
-    opacity: 0.3;
-    animation: plane-fly 15s linear infinite;
+    --wood:
+      repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0 2px, transparent 2px 23px, rgba(255, 255, 255, 0.05) 23px 25px, transparent 25px 41px),
+      linear-gradient(#8b5e3c, #6b4a35);
   }
 
-  .paper-plane::before {
-    content: '';
+  .plank-front {
+    inset: 0;
+    transform: translateZ(calc(var(--plank-d) / 2));
+    background: var(--wood);
+    box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .plank-top {
+    left: 0;
+    right: 0;
+    height: var(--plank-d);
+    top: calc((var(--plank-t) - var(--plank-d)) / 2);
+    transform: rotateX(90deg) translateZ(calc(var(--plank-t) / 2));
+    background:
+      linear-gradient(rgba(0, 0, 0, 0.25), transparent 40%),
+      var(--wood);
+    filter: brightness(1.15);
+  }
+
+  .plank-end {
+    top: 0;
+    width: var(--plank-d);
+    height: var(--plank-t);
+    left: calc((var(--plank-w) - var(--plank-d)) / 2);
+    background: #4f3322;
+  }
+
+  .plank-end.l {
+    transform: rotateY(-90deg) translateZ(calc(var(--plank-w) / 2));
+  }
+
+  .plank-end.r {
+    transform: rotateY(90deg) translateZ(calc(var(--plank-w) / 2));
+  }
+
+  .floor-shadow {
     position: absolute;
-    left: -10px;
-    top: 10px;
-    width: 0;
-    height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-top: 15px solid var(--text-color);
+    left: 10%;
+    right: 10%;
+    bottom: -6px;
+    height: 30px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(0, 0, 0, 0.35), transparent 70%);
+    filter: blur(6px);
   }
 
-  .plane-1 {
-    top: 20%;
-    animation-delay: 0s;
+  /* ---------- Copy ---------- */
+  .copy {
+    padding: 30px 0 90px;
+    text-align: center;
   }
 
-  .plane-2 {
-    top: 70%;
-    animation-delay: 7s;
+  .kicker {
+    margin: 0 0 10px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent-color);
   }
 
-  /* Animations */
-  @keyframes gentle-bounce {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-10px) rotate(2deg); }
+  .copy h1 {
+    font-size: 2.8rem;
+    color: var(--heading-color);
+    margin-bottom: 16px;
   }
 
-  @keyframes coffee-ripple {
-    0%, 100% { transform: scaleX(1); opacity: 0.3; }
-    50% { transform: scaleX(1.2); opacity: 0.1; }
+  .lede {
+    max-width: 560px;
+    margin: 0 auto 10px;
+    font-size: 1.1rem;
+    font-style: italic;
+    line-height: 1.7;
   }
 
-  @keyframes steam-rise {
-    0% {
-      opacity: 0;
-      transform: translateY(0) scale(1) rotate(0deg);
+  .hint {
+    margin: 0 0 26px;
+    font-size: 0.9rem;
+    opacity: 0.75;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+
+  .btn {
+    padding: 12px 24px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background: var(--card-bg-color);
+    color: var(--heading-color);
+    font-family: 'Lora', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent-color);
+  }
+
+  .btn.primary {
+    background: var(--heading-color);
+    border-color: var(--heading-color);
+    color: var(--bg-color);
+  }
+
+  .btn.primary:hover {
+    background: var(--accent-color);
+  }
+
+  .quick {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 22px;
+    font-size: 0.9rem;
+  }
+
+  .quick a {
+    color: var(--text-color);
+    text-decoration: underline;
+    text-decoration-color: var(--border-color);
+    text-underline-offset: 4px;
+  }
+
+  .quick a:hover {
+    color: var(--accent-color);
+    text-decoration-color: currentColor;
+  }
+
+  /* ---------- Small screens: shrink the whole scene ---------- */
+  @media (max-width: 640px) {
+    .stage {
+      height: 230px;
+      padding-top: 10px;
     }
-    10% {
-      opacity: 0.8;
-      transform: translateY(-5px) scale(1.05) rotate(-2deg);
+    .scene {
+      transform: scale(0.62);
+      transform-origin: top center;
     }
-    30% {
-      opacity: 0.9;
-      transform: translateY(-15px) scale(1.1) rotate(2deg);
-    }
-    50% {
-      opacity: 0.7;
-      transform: translateY(-25px) scale(0.95) rotate(-1deg);
-    }
-    70% {
-      opacity: 0.4;
-      transform: translateY(-35px) scale(0.8) rotate(1deg);
-    }
-    100% {
-      opacity: 0;
-      transform: translateY(-45px) scale(0.6) rotate(0deg);
-    }
-  }
-
-  @keyframes spill-grow {
-    0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.6; }
-    50% { transform: translateX(-50%) scale(1.1); opacity: 0.8; }
-  }
-
-  @keyframes digit-float {
-    0%, 100% { transform: translateY(0) rotateX(0deg); }
-    33% { transform: translateY(-8px) rotateX(10deg); }
-    66% { transform: translateY(4px) rotateX(-5deg); }
-  }
-
-  @keyframes book-float {
-    0%, 100% { transform: translateY(0) rotateZ(0deg); }
-    25% { transform: translateY(-15px) rotateZ(2deg); }
-    50% { transform: translateY(-5px) rotateZ(-1deg); }
-    75% { transform: translateY(-20px) rotateZ(3deg); }
-  }
-
-  @keyframes plane-fly {
-    0% { left: -50px; transform: translateY(0) rotateZ(0deg); }
-    25% { transform: translateY(-20px) rotateZ(5deg); }
-    50% { transform: translateY(10px) rotateZ(-3deg); }
-    75% { transform: translateY(-15px) rotateZ(2deg); }
-    100% { left: 100%; transform: translateY(0) rotateZ(0deg); }
-  }
-
-  @keyframes fade-in-up {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .error-code {
-      font-size: 5rem;
-    }
-
-    .error-title {
+    .copy h1 {
       font-size: 2rem;
     }
-
-    .error-description {
-      font-size: 1.1rem;
-      padding: 0 20px;
-    }
-
-    .error-actions {
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .floating-books {
-      display: none;
-    }
-
-    .coffee-cup {
-      width: 60px;
-      height: 80px;
-    }
-
-    .coffee-liquid {
-      width: 50px;
-      height: 45px;
-    }
-
-    .primary-button,
-    .secondary-button {
-      width: 100%;
-      max-width: 280px;
-      justify-content: center;
-    }
   }
 
-  @media (max-width: 480px) {
-    .error-code {
-      font-size: 4rem;
-      gap: 5px;
+  @media (prefers-reduced-motion: reduce) {
+    .world,
+    .gap-card,
+    .steam {
+      animation: none !important;
     }
-
-    .error-title {
-      font-size: 1.8rem;
+    .steam {
+      opacity: 0.5;
     }
-
-    .quick-links {
-      gap: 10px;
-    }
-
-    .quick-link {
-      font-size: 0.8rem;
-      padding: 6px 12px;
-    }
-  }
-
-  /* Dark theme adjustments */
-  [data-theme="dark"] .coffee-cup {
-    background: linear-gradient(145deg, var(--card-bg-color), #3a3530);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-  }
-
-  [data-theme="dark"] .steam {
-    background: linear-gradient(to top, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.05));
-  }
-
-  [data-theme="dark"] .paper-plane {
-    border-bottom-color: var(--accent-color);
-    opacity: 0.2;
-  }
-
-  [data-theme="dark"] .paper-plane::before {
-    border-top-color: var(--heading-color);
-  }
-
-  /* Add some extra coffee stain effects for the 404 page */
-  .not-found-section::before {
-    content: '';
-    position: absolute;
-    top: 10%;
-    left: 5%;
-    width: 150px;
-    height: 150px;
-    background: radial-gradient(circle, var(--coffee-stain-2), transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-    animation: subtle-pulse 8s ease-in-out infinite;
-  }
-
-  .not-found-section::after {
-    content: '';
-    position: absolute;
-    bottom: 15%;
-    right: 8%;
-    width: 200px;
-    height: 100px;
-    background: radial-gradient(ellipse, var(--coffee-stain-3), transparent 60%);
-    pointer-events: none;
-    animation: subtle-pulse 6s ease-in-out infinite reverse;
-  }
-
-  @keyframes subtle-pulse {
-    0%, 100% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 0.3; transform: scale(1.1); }
   }
 </style>
 
 <script>
-  // Add some interactive elements
-  document.addEventListener('DOMContentLoaded', () => {
-    // Add click effect to coffee cup
-    const coffeeCup = document.querySelector('.coffee-cup');
-    if (coffeeCup) {
-      coffeeCup.addEventListener('click', () => {
-        coffeeCup.style.animation = 'none';
-        coffeeCup.offsetHeight; // Trigger reflow
-        coffeeCup.style.animation = 'gentle-bounce 0.6s ease-in-out';
-        
-        setTimeout(() => {
-          coffeeCup.style.animation = 'gentle-bounce 3s ease-in-out infinite';
-        }, 600);
-      });
-    }
+  // Tilt the shelf toward the pointer so the books' depth shows
+  const scene = document.getElementById('scene');
+  const world = document.getElementById('world');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // Add parallax effect to floating elements
-    let ticking = false;
-    
-    const updateParallax = (scrollY: number) => {
-      const books = document.querySelectorAll('.book');
-      const planes = document.querySelectorAll('.paper-plane');
-      
-      books.forEach((book, index) => {
-        const speed = (index + 1) * 0.5;
-        const yPos = scrollY * speed * 0.1;
-        (book as HTMLElement).style.transform = `translateY(${yPos}px)`;
-      });
-      
-      planes.forEach((plane, index) => {
-        const speed = (index + 1) * 0.3;
-        const yPos = scrollY * speed * 0.05;
-        (plane as HTMLElement).style.transform = `translateY(${yPos}px)`;
-      });
-      
-      ticking = false;
-    };
-
-    const handleScroll = () => {
-      if (!ticking) {
-        requestAnimationFrame(() => updateParallax(window.scrollY));
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-
-    // Add hover effects to digits
-    const digits = document.querySelectorAll('.digit');
-    digits.forEach((digit) => {
-      digit.addEventListener('mouseenter', () => {
-        (digit as HTMLElement).style.transform = 'scale(1.1) rotateY(15deg)';
-        (digit as HTMLElement).style.color = 'var(--accent-color)';
-      });
-      
-      digit.addEventListener('mouseleave', () => {
-        (digit as HTMLElement).style.transform = '';
-        (digit as HTMLElement).style.color = '';
+  if (scene && world && !reduce && window.matchMedia('(hover: hover)').matches) {
+    let frame = 0;
+    window.addEventListener('pointermove', (e) => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const x = e.clientX / window.innerWidth - 0.5; // -0.5..0.5
+        const y = e.clientY / window.innerHeight - 0.5;
+        world.classList.add('tracking');
+        world.style.transform = `rotateX(${-12 - y * 16}deg) rotateY(${-15 + x * 40}deg)`;
       });
     });
+    document.addEventListener('pointerleave', () => {
+      world.classList.remove('tracking');
+      world.style.transform = '';
+    });
+  }
 
-    // Add some random book movements
-    const addRandomMovement = () => {
-      const books = document.querySelectorAll('.book');
-      books.forEach((book, index) => {
-        setTimeout(() => {
-          (book as HTMLElement).style.transform += ` rotateZ(${Math.random() * 10 - 5}deg)`;
-          
-          setTimeout(() => {
-            (book as HTMLElement).style.transform = (book as HTMLElement).style.transform.replace(/rotateZ\([^)]*\)/, '');
-          }, 1000);
-        }, index * 2000 + Math.random() * 3000);
-      });
-    };
-
-    // Start random movements
-    addRandomMovement();
-    setInterval(addRandomMovement, 8000);
+  const random = document.getElementById('random-chapter');
+  random?.addEventListener('click', () => {
+    const urls: string[] = JSON.parse(random.dataset.urls ?? '[]');
+    if (urls.length) window.location.href = urls[Math.floor(Math.random() * urls.length)];
   });
 </script>
