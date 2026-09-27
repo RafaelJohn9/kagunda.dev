@@ -7,9 +7,11 @@ export interface Props {
 }
 
 const { folder, volume } = Astro.props;
-const MAX_LISTED = 4;
-const listed = folder.posts.slice(0, MAX_LISTED);
-const hidden = folder.posts.length - listed.length;
+// Four chapters fit on a contents page; longer volumes get more pages to flip through
+const PER_PAGE = 4;
+const pages = Array.from({ length: Math.ceil(folder.posts.length / PER_PAGE) }, (_, p) =>
+  folder.posts.slice(p * PER_PAGE, (p + 1) * PER_PAGE),
+);
 const count = folder.posts.length;
 const chapters = `${count} ${count === 1 ? 'chapter' : 'chapters'}`;
 const shortDate = (date: Date) =>
@@ -19,24 +21,49 @@ const shortDate = (date: Date) =>
 <article class="book" style={`--leather: ${folder.color}`}>
   <span class="book-spine" aria-hidden="true"></span>
 
-  <!-- Contents page, revealed when the cover swings open -->
+  <!-- Contents pages, revealed when the cover swings open -->
   <div class="book-page">
-    <p class="toc-head">Contents</p>
-    <ol class="toc">
-      {listed.map((post, i) => (
-        <li style={`--i: ${i}`}>
-          <a href={`/blog/${post.id}`}>
-            <span class="idx">#{i + 1}</span>
-            <span class="toc-title">{post.data.title}</span>
-            <span class="leader" aria-hidden="true"></span>
-            <time datetime={post.data.pubDate.toISOString()}>{shortDate(post.data.pubDate)}</time>
-          </a>
-        </li>
-      ))}
-    </ol>
-    <a class="toc-all" href={`/series/${folder.id}`} style={`--i: ${listed.length}`}>
-      {hidden > 0 ? `+${hidden} more chapters →` : 'Read the whole volume →'}
-    </a>
+    {pages.map((chapters, p) => (
+      <section
+        class="sheet"
+        style={`--z: ${pages.length - p}`}
+        inert={p > 0}
+        aria-label={`Contents, page ${p + 1} of ${pages.length}`}
+      >
+        <p class="toc-head">{p === 0 ? 'Contents' : 'Contents, continued'}</p>
+        <ol class="toc">
+          {chapters.map((post, i) => (
+            <li style={`--i: ${i}`}>
+              <a href={`/blog/${post.id}`}>
+                <span class="idx">#{p * PER_PAGE + i + 1}</span>
+                <span class="toc-title">{post.data.title}</span>
+                <span class="leader" aria-hidden="true"></span>
+                <time datetime={post.data.pubDate.toISOString()}>{shortDate(post.data.pubDate)}</time>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    ))}
+
+    <div class="page-foot" style={`--i: ${PER_PAGE}`}>
+      {pages.length > 1 && (
+        <div class="pager">
+          <button class="flip prev" type="button" aria-label="Previous page" disabled>‹</button>
+          <span class="page-num"><span class="cur">1</span> / {pages.length}</span>
+          <button class="flip next" type="button" aria-label="Next page">›</button>
+        </div>
+      )}
+      <a class="toc-all" href={`/series/${folder.id}`}>
+        {pages.length > 1 ? 'All chapters →' : 'Read the whole volume →'}
+      </a>
+    </div>
+
+    <button class="book-close" type="button" aria-label={`Close ${folder.title}`}>
+      <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+        <path d="M6 6l12 12M18 6L6 18" />
+      </svg>
+    </button>
   </div>
 
   <div class="book-cover">
@@ -64,10 +91,14 @@ const shortDate = (date: Date) =>
     transition: transform 0.4s ease;
   }
 
-  .book:hover,
-  .book:focus-within,
   .book.is-open {
     z-index: 5;
+  }
+
+  @media (hover: hover) {
+    .book:is(:hover, :focus-within) {
+      z-index: 5;
+    }
   }
 
   /* Spine: stays put while the cover swings on it */
@@ -93,10 +124,21 @@ const shortDate = (date: Date) =>
   .book-page {
     position: absolute;
     inset: 6px 6px 6px var(--spine-w);
-    padding: 18px 20px 14px 24px;
-    display: flex;
-    flex-direction: column;
+    perspective: 1400px;
+    z-index: 1;
+  }
+
+  /* Each sheet is a page that turns on the spine */
+  .sheet {
+    position: absolute;
+    inset: 0;
+    padding: 18px 20px 58px 24px;
     border-radius: 0 4px 4px 0;
+    z-index: var(--z);
+    transform-origin: left center;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transition: transform 0.7s cubic-bezier(0.45, 0.05, 0.2, 1);
     background:
       /* coffee ring left by a mug */
       radial-gradient(circle at 86% 90%,
@@ -109,7 +151,10 @@ const shortDate = (date: Date) =>
       linear-gradient(90deg, rgba(60, 35, 15, 0.16), transparent 14%),
       var(--card-bg-color);
     box-shadow: inset 0 0 0 1px var(--border-color);
-    z-index: 1;
+  }
+
+  .sheet.turned {
+    transform: rotateY(-180deg);
   }
 
   .toc-head {
@@ -128,7 +173,7 @@ const shortDate = (date: Date) =>
   }
 
   .toc li,
-  .toc-all {
+  .page-foot {
     opacity: 0;
     transform: translateX(10px);
     transition: opacity 0.2s ease, transform 0.2s ease;
@@ -181,9 +226,87 @@ const shortDate = (date: Date) =>
     white-space: nowrap;
   }
 
+  .page-foot {
+    position: absolute;
+    left: 24px;
+    right: 20px;
+    bottom: 12px;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .pager {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .flip {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    padding: 0 0 2px;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    background: var(--bg-color);
+    color: var(--heading-color);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .flip:hover:not(:disabled) {
+    border-color: var(--accent-color);
+    background: color-mix(in srgb, var(--accent-color) 12%, var(--bg-color));
+  }
+
+  .flip:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .page-num {
+    min-width: 3.2em;
+    text-align: center;
+    font-size: 0.75rem;
+    font-style: italic;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.8;
+  }
+
+  /* Close button: only on touch screens, where there's no hover to leave */
+  .book-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 60;
+    width: 36px;
+    height: 36px;
+    display: none;
+    place-items: center;
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    background: var(--bg-color);
+    color: var(--heading-color);
+    cursor: pointer;
+  }
+
+  @media (hover: none) {
+    .book.is-open .book-close {
+      display: grid;
+    }
+    .flip {
+      width: 38px;
+      height: 38px;
+    }
+  }
+
   .toc-all {
-    margin-top: auto;
-    align-self: flex-start;
     font-size: 0.8rem;
     font-weight: 700;
     font-style: italic;
@@ -355,30 +478,40 @@ const shortDate = (date: Date) =>
     line-height: 1.5;
   }
 
-  /* Open: cover swings past 90° on its spine, contents follow in */
-  .book:hover .book-cover,
-  .book:focus-within .book-cover,
+  /* Open: cover swings past 90° on its spine, contents follow in.
+     Touch screens only use .is-open: a tapped element keeps :hover until the
+     next tap elsewhere, which would stop the close button from closing it. */
   .book.is-open .book-cover {
     transform: rotateY(-100deg);
     pointer-events: none;
   }
 
-  .book:hover .toc li,
-  .book:hover .toc-all,
-  .book:focus-within .toc li,
-  .book:focus-within .toc-all,
-  .book.is-open .toc li,
-  .book.is-open .toc-all {
+  .book.is-open :is(.toc li, .page-foot) {
     opacity: 1;
     transform: none;
     transition-duration: 0.35s;
     transition-delay: calc(0.3s + var(--i) * 0.07s);
   }
 
+  @media (hover: hover) {
+    .book:is(:hover, :focus-within) .book-cover {
+      transform: rotateY(-100deg);
+      pointer-events: none;
+    }
+
+    .book:is(:hover, :focus-within) :is(.toc li, .page-foot) {
+      opacity: 1;
+      transform: none;
+      transition-duration: 0.35s;
+      transition-delay: calc(0.3s + var(--i) * 0.07s);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .book-cover,
+    .sheet,
     .toc li,
-    .toc-all {
+    .page-foot {
       transition-duration: 0s !important;
       transition-delay: 0s !important;
     }
@@ -386,17 +519,90 @@ const shortDate = (date: Date) =>
 </style>
 
 <script>
-  // Touch screens can't hover: the first tap opens a book, taps on the open
-  // contents page follow its links.
+  const books = [...document.querySelectorAll<HTMLElement>('.book')];
+  const resets = new Map<HTMLElement, () => void>();
+
+  // Page flipping: buttons everywhere, swipe on touch screens
+  books.forEach((book) => {
+    const sheets = [...book.querySelectorAll<HTMLElement>('.sheet')];
+    const prev = book.querySelector<HTMLButtonElement>('.flip.prev');
+    const next = book.querySelector<HTMLButtonElement>('.flip.next');
+    const cur = book.querySelector('.page-num .cur');
+    let page = 0;
+
+    const go = (n: number) => {
+      n = Math.max(0, Math.min(sheets.length - 1, n));
+      if (n === page) return;
+      page = n;
+      sheets.forEach((sheet, i) => {
+        sheet.classList.toggle('turned', i < page);
+        sheet.inert = i !== page;
+      });
+      if (prev) prev.disabled = page === 0;
+      if (next) next.disabled = page === sheets.length - 1;
+      if (cur) cur.textContent = String(page + 1);
+    };
+    resets.set(book, () => go(0));
+
+    prev?.addEventListener('click', () => go(page - 1));
+    next?.addEventListener('click', () => go(page + 1));
+
+    if (sheets.length > 1) {
+      const pageEl = book.querySelector<HTMLElement>('.book-page');
+      let x0 = 0;
+      let y0 = 0;
+      pageEl?.addEventListener('touchstart', (e) => {
+        x0 = e.touches[0].clientX;
+        y0 = e.touches[0].clientY;
+      }, { passive: true });
+      pageEl?.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - x0;
+        const dy = e.changedTouches[0].clientY - y0;
+        if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) go(page + (dx < 0 ? 1 : -1));
+      });
+    }
+
+    // With a mouse, return to the first page once the book has closed
+    let leaveTimer: number | undefined;
+    book.addEventListener('mouseleave', () => {
+      if (book.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
+      leaveTimer = window.setTimeout(() => go(0), 900);
+    });
+    book.addEventListener('mouseenter', () => clearTimeout(leaveTimer));
+  });
+
+  const closeAll = (except?: HTMLElement) => {
+    books.forEach((b) => {
+      if (b !== except && b.classList.contains('is-open')) {
+        b.classList.remove('is-open');
+        window.setTimeout(() => resets.get(b)?.(), 600);
+      }
+    });
+  };
+
+  // Touch screens can't hover: tap a book to open it; close it with the ×,
+  // by tapping outside it, or with Escape
   if (window.matchMedia('(hover: none)').matches) {
-    document.querySelectorAll<HTMLElement>('.book').forEach((book) => {
+    books.forEach((book) => {
       book.addEventListener('click', (e) => {
-        const link = (e.target as HTMLElement).closest('a');
-        if (link && book.classList.contains('is-open')) return;
-        if (link) e.preventDefault(); // cover title tapped while closed: open instead
-        document.querySelectorAll('.book.is-open').forEach((b) => b !== book && b.classList.remove('is-open'));
-        book.classList.toggle('is-open');
+        const target = e.target as HTMLElement;
+        if (target.closest('.book-close')) {
+          closeAll();
+          return;
+        }
+        if (target.closest('button')) return; // page flips
+        if (book.classList.contains('is-open')) return; // links on the open page work as normal
+        e.preventDefault(); // a tap on the closed cover opens it instead of following the title link
+        closeAll(book);
+        book.classList.add('is-open');
       });
     });
+    document.addEventListener('click', (e) => {
+      if (!(e.target as HTMLElement).closest('.book')) closeAll();
+    });
   }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAll();
+  });
 </script>
