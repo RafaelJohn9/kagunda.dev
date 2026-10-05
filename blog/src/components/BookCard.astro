@@ -19,6 +19,9 @@ const shortDate = (date: Date) =>
 ---
 
 <article class="book" style={`--leather: ${folder.color}`}>
+  <!-- back board and the edges of the page block, peeking out under the cover -->
+  <span class="book-back" aria-hidden="true"></span>
+  <span class="book-block" aria-hidden="true"></span>
   <span class="book-spine" aria-hidden="true"></span>
 
   <!-- Contents pages, revealed when the cover swings open -->
@@ -94,6 +97,17 @@ const shortDate = (date: Date) =>
     --spine-w: 18px;
     --gold: #e6c38a;
     --cream: #f3e6cc;
+    /* how far the back board and page block show past the cover */
+    --depth: 6px;
+    /* the pages stay paper in either theme, a little dimmer at night */
+    --paper: #fbf4e3;
+    --paper-edge: #e8dabd;
+    --ink: #4a3426;
+    /* real gilt shades light to dark across the letters */
+    --foil: linear-gradient(175deg, #f7e2b0 0%, #e6c38a 38%, #b98d4f 62%, #e9cb92 100%);
+    /* fine grain, laid over leather and paper */
+    --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 0 0 0 0 0.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0.35 0 0 0 0.68 0.35 0 0 0 0.68 0.35 0 0 0 0.68 0 0 0 0 0.6'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     /* cover motion: a slow lift, a swing that overshoots and settles; closing
        falls shut and bounces lightly off the pages */
     --open-ease: cubic-bezier(0.34, 1.3, 0.5, 1);
@@ -111,8 +125,52 @@ const shortDate = (date: Date) =>
     }
   }
 
+  :global([data-theme='dark']) .book {
+    --paper: #eadcbf;
+    --paper-edge: #cdbb97;
+  }
+
   .book.is-open {
     z-index: 5;
+  }
+
+  /* Back board: the same leather as the cover, sitting a little lower and to
+     the right so the closed book has some thickness. It carries the book's
+     shadow on the desk. */
+  .book-back {
+    position: absolute;
+    inset: var(--depth) calc(var(--depth) * -1) calc(var(--depth) * -1) 2px;
+    border-radius: 4px 3px 3px 4px;
+    background: color-mix(in srgb, var(--leather), #000 38%);
+    box-shadow:
+      0 1px 1px rgba(20, 10, 4, 0.25),
+      0 4px 8px rgba(20, 10, 4, 0.2),
+      0 18px 30px -8px rgba(20, 10, 4, 0.45);
+    transition: box-shadow 0.4s ease;
+  }
+
+  /* Page block: fine lines of stacked paper between the boards */
+  .book-block {
+    position: absolute;
+    top: calc(var(--depth) / 2);
+    left: var(--spine-w);
+    right: calc(var(--depth) / -2);
+    bottom: calc(var(--depth) / -2);
+    border-radius: 0 2px 2px 0;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 1px, rgba(90, 60, 30, 0.12) 1px 2px),
+      repeating-linear-gradient(transparent 0 1px, rgba(90, 60, 30, 0.12) 1px 2px),
+      var(--paper-edge);
+    box-shadow: inset 0 0 0 1px rgba(90, 60, 30, 0.18);
+  }
+
+  @media (hover: hover) {
+    .book:is(:hover, :focus-within) .book-back {
+      box-shadow:
+        0 1px 1px rgba(20, 10, 4, 0.25),
+        0 8px 14px rgba(20, 10, 4, 0.22),
+        0 28px 44px -10px rgba(20, 10, 4, 0.5);
+    }
   }
 
   @media (hover: hover) {
@@ -128,15 +186,20 @@ const shortDate = (date: Date) =>
     width: var(--spine-w);
     border-radius: 4px 0 0 4px;
     background:
+      var(--grain),
       linear-gradient(transparent 14%, var(--gold) 14%, var(--gold) calc(14% + 1px), transparent calc(14% + 1px),
         transparent 18%, var(--gold) 18%, var(--gold) calc(18% + 1px), transparent calc(18% + 1px),
         transparent 82%, var(--gold) 82%, var(--gold) calc(82% + 1px), transparent calc(82% + 1px),
         transparent 86%, var(--gold) 86%, var(--gold) calc(86% + 1px), transparent calc(86% + 1px)),
+      /* raised bands between the gold rules: lit on top, shaded underneath */
+      linear-gradient(transparent 14.5%, rgba(255, 235, 200, 0.18) 15%, transparent 16%, rgba(0, 0, 0, 0.3) 17.5%, transparent 18%,
+        transparent 82.5%, rgba(255, 235, 200, 0.18) 83%, transparent 84%, rgba(0, 0, 0, 0.3) 85.5%, transparent 86%),
       linear-gradient(90deg,
-        color-mix(in srgb, var(--leather), #000 45%),
-        color-mix(in srgb, var(--leather), #fff 6%) 55%,
-        color-mix(in srgb, var(--leather), #000 30%));
-    opacity: 0.95;
+        color-mix(in srgb, var(--leather), #000 50%),
+        color-mix(in srgb, var(--leather), #fff 10%) 45%,
+        color-mix(in srgb, var(--leather), #000 35%));
+    background-blend-mode: soft-light, normal, normal, normal;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.35);
     z-index: 3;
   }
 
@@ -146,6 +209,14 @@ const shortDate = (date: Date) =>
     inset: 6px 6px 6px var(--spine-w);
     perspective: 1400px;
     z-index: 1;
+    /* printed ink on paper, whatever the site theme */
+    --card-bg-color: var(--paper);
+    --bg-color: var(--paper);
+    --text-color: var(--ink);
+    --heading-color: #3b2617;
+    --accent-color: #8b5a32;
+    --border-color: rgba(90, 60, 30, 0.2);
+    color: var(--ink);
     /* drop under the cover at once when closing */
     transition: z-index 0s;
   }
@@ -177,10 +248,12 @@ const shortDate = (date: Date) =>
     transform: rotateY(180deg);
     border-radius: 4px 0 0 4px;
     background:
+      var(--paper-grain),
       linear-gradient(90deg, rgba(60, 35, 15, 0.16), transparent 14%),
       /* faint lines of ink showing through from the other side */
       repeating-linear-gradient(transparent 0 26px, rgba(92, 64, 51, 0.025) 26px 29px),
       var(--card-bg-color);
+    background-blend-mode: multiply, normal, normal, normal;
     box-shadow: inset 0 0 0 1px var(--border-color);
   }
 
@@ -246,18 +319,25 @@ const shortDate = (date: Date) =>
 
   .sheet-front {
     padding: 18px 20px 58px 24px;
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 3px 3px 0;
     background:
+      var(--paper-grain),
       /* coffee ring left by a mug */
-      radial-gradient(circle at 86% 90%,
-        transparent 0 30px,
-        rgba(139, 94, 60, 0.22) 31px 33px,
-        rgba(139, 94, 60, 0.08) 34px 36px,
-        transparent 37px),
-      radial-gradient(circle at 82% 86%, rgba(139, 94, 60, 0.06), transparent 60px),
-      /* gutter shadow near the spine */
-      linear-gradient(90deg, rgba(60, 35, 15, 0.16), transparent 14%),
+      radial-gradient(circle at calc(100% + 6px) 4px,
+        transparent 0 26px,
+        rgba(139, 94, 60, 0.16) 27px 28.5px,
+        rgba(139, 94, 60, 0.06) 29.5px 31px,
+        transparent 32px),
+      radial-gradient(circle at calc(100% - 4px) 10px, rgba(139, 94, 60, 0.05), transparent 46px),
+      /* the page curves down into the gutter, and lifts a touch at its edge */
+      linear-gradient(90deg,
+        rgba(60, 35, 15, 0.22),
+        rgba(60, 35, 15, 0.06) 5%,
+        transparent 16%,
+        transparent 94%,
+        rgba(60, 35, 15, 0.05)),
       var(--card-bg-color);
+    background-blend-mode: multiply, normal, normal, normal, normal;
     box-shadow: inset 0 0 0 1px var(--border-color);
   }
 
@@ -460,7 +540,7 @@ const shortDate = (date: Date) =>
   .cover-inside {
     position: absolute;
     inset: 0;
-    border-radius: 0 6px 6px 0;
+    border-radius: 0 3px 3px 0;
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
   }
@@ -473,14 +553,26 @@ const shortDate = (date: Date) =>
     text-align: center;
     color: var(--cream);
     background:
-      radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.1), transparent 60%),
+      var(--grain),
+      /* the hinge: a groove pressed into the board beside the spine */
+      linear-gradient(90deg,
+        rgba(0, 0, 0, 0.35),
+        rgba(0, 0, 0, 0.08) 6px,
+        rgba(0, 0, 0, 0.3) 9px,
+        rgba(255, 235, 200, 0.12) 11px,
+        transparent 15px),
+      radial-gradient(ellipse at 30% 20%, rgba(255, 240, 215, 0.12), transparent 60%),
       linear-gradient(135deg,
         color-mix(in srgb, var(--leather), #fff 8%),
         var(--leather) 45%,
         color-mix(in srgb, var(--leather), #000 28%));
+    background-blend-mode: soft-light, normal, normal, normal;
+    /* board edges: lit along the top, worn darker at the bottom and fore-edge */
     box-shadow:
-      inset 4px 0 8px rgba(0, 0, 0, 0.35),
-      0 6px 16px rgba(40, 22, 10, 0.25);
+      inset 0 1px 0 rgba(255, 235, 200, 0.18),
+      inset -1px 0 0 rgba(0, 0, 0, 0.25),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+      0 1px 2px rgba(20, 10, 4, 0.3);
     transition: box-shadow 0.4s ease;
   }
 
@@ -491,7 +583,9 @@ const shortDate = (date: Date) =>
     position: absolute;
     pointer-events: none;
     border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
-    border-radius: 3px;
+    border-radius: 2px;
+    /* tooled lines sit in a shallow groove */
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(0, 0, 0, 0.25);
   }
 
   .cover-front::before {
@@ -527,8 +621,22 @@ const shortDate = (date: Date) =>
     text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
   }
 
+  /* gold foil stamped into the leather: shaded gilt, a dark lip above where
+     the die pressed in, a catch of light below */
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .cover-front h3 a {
+      background: var(--foil);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: none;
+      filter: drop-shadow(0 -1px 0 rgba(0, 0, 0, 0.45)) drop-shadow(0 1px 0 rgba(255, 230, 190, 0.18));
+    }
+  }
+
   .cover-front h3 a:hover {
     text-decoration: underline;
+    text-decoration-color: var(--gold);
     text-underline-offset: 5px;
   }
 
@@ -581,23 +689,36 @@ const shortDate = (date: Date) =>
     }
   }
 
-  /* Inside of the cover: coffee-marbled endpaper with a bookplate */
+  /* Inside of the cover: the leather folds over the board's edges, and a
+     patterned endpaper is pasted down inside it, with a bookplate */
   .cover-inside {
     transform: rotateY(180deg) translateZ(4px);
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 3px 0 0 3px;
     background:
-      radial-gradient(ellipse 60% 40% at 25% 30%, rgba(111, 78, 55, 0.55), transparent 70%),
-      radial-gradient(ellipse 50% 35% at 75% 65%, rgba(166, 124, 82, 0.5), transparent 70%),
-      radial-gradient(ellipse 40% 30% at 40% 85%, rgba(92, 64, 51, 0.5), transparent 70%),
-      #d9c3a0;
+      var(--paper-grain),
+      /* small printed lozenges, as on a cloth-bound endpaper */
+      radial-gradient(circle, rgba(111, 72, 42, 0.28) 0 1.2px, transparent 1.7px) 0 0 / 12px 12px,
+      radial-gradient(circle, rgba(111, 72, 42, 0.16) 0 1.2px, transparent 1.7px) 6px 6px / 12px 12px,
+      #e3d0ab;
+    background-blend-mode: multiply, normal, normal, normal;
+    /* the turned-in leather border, its edge lying just proud of the paper */
+    box-shadow:
+      inset 0 0 0 7px color-mix(in srgb, var(--leather), #000 15%),
+      inset 0 0 0 8px rgba(0, 0, 0, 0.3),
+      inset 0 0 12px 8px rgba(60, 35, 15, 0.25);
   }
+
 
   .bookplate {
     padding: 14px 18px;
     border: 1px solid rgba(92, 64, 51, 0.6);
-    background: #f3e6cc;
+    outline: 1px solid rgba(92, 64, 51, 0.3);
+    outline-offset: -4px;
+    background: #f6ecd6;
+    box-shadow: 0 1px 2px rgba(60, 35, 15, 0.2);
     color: #5c4033;
     font-size: 0.75rem;
     font-style: italic;
