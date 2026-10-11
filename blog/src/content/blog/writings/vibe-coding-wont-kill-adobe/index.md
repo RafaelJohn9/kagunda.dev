@@ -3,7 +3,9 @@ title: "Vibe Coding Won't Kill Photoshop. It's Killing Something Else."
 description: "Everyone's angry at Adobe and Sony, and anyone can build an app in a weekend now. So why are the incumbents posting record revenue?"
 pubDate: 2026-10-11
 tags: ["ai", "vibe-coding", "software-industry", "creative-tools", "opinion"]
+series: "hype-check"
 category: "writings"
+featured: true
 draft: false
 ---
 

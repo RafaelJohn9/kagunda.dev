@@ -28,6 +28,11 @@ export const SERIES = {
     description: 'Books and essays worth coming back to.',
     color: '#7d5a3a',
   },
+  'hype-check': {
+    title: 'Hype Check',
+    description: 'Popular claims about tech, taken back to the evidence to see what actually holds up.',
+    color: '#5a3d2b',
+  },
 } as const;
 
 export type SeriesId = keyof typeof SERIES;
